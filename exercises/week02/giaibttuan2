@@ -1,0 +1,422 @@
+Bài 1: Mảng cơ bản ⭐ Nhập mảng n phần tử. Tính min, max, trung bình, tổng. Không dùng STL:
+#include <iostream>
+using namespace std;
+int main() {
+    int n;
+    cout << "Nhap so phan tu n: ";
+    cin >> n;
+
+    int* arr = new int[n];
+    for (int i = 0; i < n; i++) {
+        cout << "Nhap phan tu thu " << i + 1 << ": ";
+        cin >> arr[i];
+    }
+
+    int minVal = arr[0];
+    int maxVal = arr[0];
+    long long tong = 0;
+
+    for (int i = 0; i < n; i++) {
+        if (arr[i] < minVal) minVal = arr[i];
+        if (arr[i] > maxVal) maxVal = arr[i];
+        tong += arr[i];
+    }
+    double trungBinh = (double)tong / n;
+
+    cout << "\n--- KET QUA ---" << endl;
+    cout << "Min: " << minVal << endl;
+    cout << "Max: " << maxVal << endl;
+    cout << "Tong: " << tong << endl;
+    cout << "Trung binh: " << trungBinh << endl;
+
+    delete[] arr;
+    return 0;
+}
+Bài 2: Mảng 2D ⭐⭐ Nhân 2 ma trận n×n. Tính định thức ma trận 3×3. Hiển thị đẹp.
+#include <iostream>
+#include <iomanip>
+using namespace std;
+
+void nhapMaTran(int** mt, int n) {
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            cout << "Nhap [" << i << "][" << j << "]: ";
+            cin >> mt[i][j];
+        }
+    }
+}
+
+void xuatMaTran(int** mt, int n) {
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            cout << setw(6) << mt[i][j] << " ";
+        }
+        cout << endl;
+    }
+}
+
+int tinhDinhThuc3x3(int** mt) {
+    int a = mt[0][0], b = mt[0][1], c = mt[0][2];
+    int d = mt[1][0], e = mt[1][1], f = mt[1][2];
+    int g = mt[2][0], h = mt[2][1], i = mt[2][2];
+    return a*(e*i - f*h) - b*(d*i - f*g) + c*(d*h - e*g);
+}
+
+int main() {
+    int n;
+    cout << "Nhap cap cua ma tran n (Nhap n = 3 de test ca tinh dinh thuc): ";
+    cin >> n;
+
+    int** A = new int*[n];
+    int** B = new int*[n];
+    int** C = new int*[n];
+    for (int i = 0; i < n; i++) {
+        A[i] = new int[n];
+        B[i] = new int[n];
+        C[i] = new int[n];
+    }
+
+    cout << "\nNhap ma tran A:\n";
+    nhapMaTran(A, n);
+    cout << "\nNhap ma tran B:\n";
+    nhapMaTran(B, n);
+
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            C[i][j] = 0;
+            for (int k = 0; k < n; k++) {
+                C[i][j] += A[i][k] * B[k][j];
+            }
+        }
+    }
+
+    cout << "\nMa tran A:\n"; xuatMaTran(A, n);
+    cout << "\nMa tran B:\n"; xuatMaTran(B, n);
+    cout << "\nMa tran Tich C = A * B:\n"; xuatMaTran(C, n);
+
+    if (n == 3) {
+        cout << "\nDinh thuc ma tran A: " << tinhDinhThuc3x3(A) << endl;
+        cout << "Dinh thuc ma tran B: " << tinhDinhThuc3x3(B) << endl;
+    }
+
+    for (int i = 0; i < n; i++) {
+        delete[] A[i];
+        delete[] B[i];
+        delete[] C[i];
+    }
+    delete[] A;
+    delete[] B;
+    delete[] C;
+    return 0;
+}
+Bài 3: Con trỏ & cấp phát động ⭐⭐ Cài đặt mảng động tự resize (như std::vector đơn giản). Hỗ trợ push_back, pop_back, at(i).
+#include <iostream>
+
+using namespace std;
+
+struct MangDong {
+    int* data;
+    int size;
+    int capacity;
+};
+
+void khoiTao(MangDong &v) {
+    v.capacity = 2;
+    v.size = 0;
+    v.data = new int[v.capacity];
+}
+
+void resize(MangDong &v, int newCapacity) {
+    int* newData = new int[newCapacity];
+    for (int i = 0; i < v.size; i++) {
+        newData[i] = v.data[i];
+    }
+    delete[] v.data;
+    v.data = newData;
+    v.capacity = newCapacity;
+}
+
+void push_back(MangDong &v, int value) {
+    if (v.size >= v.capacity) {
+        resize(v, v.capacity * 2);
+    }
+    v.data[v.size] = value;
+    v.size++;
+}
+
+void pop_back(MangDong &v) {
+    if (v.size > 0) {
+        v.size--;
+    }
+}
+
+int at(MangDong &v, int index) {
+    if (index >= 0 && index < v.size) {
+        return v.data[index];
+    }
+    return -1; 
+}
+
+void xuatMang(MangDong &v) {
+    cout << "Mang hien tai: ";
+    for (int i = 0; i < v.size; i++) {
+        cout << v.data[i] << " ";
+    }
+    cout << " | Size: " << v.size << " | Capacity: " << v.capacity << endl;
+}
+
+void giaiPhong(MangDong &v) {
+    delete[] v.data;
+}
+
+int main() {
+    MangDong v;
+    khoiTao(v);
+
+    push_back(v, 10);
+    push_back(v, 20);
+    push_back(v, 30);
+    xuatMang(v);
+
+    push_back(v, 40);
+    xuatMang(v);
+
+    pop_back(v);
+    xuatMang(v);
+
+    cout << "Phan tu tai index 1: " << at(v, 1) << endl;
+
+    giaiPhong(v);
+    return 0;
+}
+Bài 4: 🔥 Dự Án Mini — Student Score Manager ⭐⭐⭐
+#include <iostream>
+#include <string>
+#include <fstream>
+#include <iomanip>
+
+using namespace std;
+
+struct SinhVien {
+    string mssv;
+    string hoTen;
+    float diem;
+};
+
+void resizeMang(SinhVien* &danhSach, int &capacity, int newCapacity) {
+    SinhVien* mangMoi = new SinhVien[newCapacity];
+    for (int i = 0; i < capacity; i++) {
+        mangMoi[i] = danhSach[i];
+    }
+    delete[] danhSach;
+    danhSach = mangMoi;
+    capacity = newCapacity;
+}
+
+void themSinhVien(SinhVien* &danhSach, int &n, int &capacity) {
+    if (n >= capacity) {
+        int newCapacity = (capacity == 0) ? 2 : capacity * 2;
+        resizeMang(danhSach, capacity, newCapacity);
+    }
+
+    SinhVien sv;
+    cout << "\n--- NHAP THONG TIN SINH VIEN CHEN CUOI ---\n";
+    cout << "Nhap MSSV: "; 
+    cin >> sv.mssv;
+    cin.ignore(); 
+    cout << "Nhap ho va ten: "; 
+    getline(cin, sv.hoTen);
+    cout << "Nhap diem: "; 
+    cin >> sv.diem;
+
+    danhSach[n] = sv;
+    n++;
+    cout << "=> Them sinh vien thanh cong!\n";
+}
+
+void hienThiDanhSach(SinhVien* danhSach, int n) {
+    if (n == 0) {
+        cout << "\nDanh sach trong!\n";
+        return;
+    }
+    cout << "\n=======================================================\n";
+    cout << setfill(' ') << setw(5) << left << "STT" 
+         << setw(15) << left << "MSSV" 
+         << setw(25) << left << "Ho va Ten" 
+         << setw(10) << left << "Diem" << endl;
+    cout << "-------------------------------------------------------\n";
+    for (int i = 0; i < n; i++) {
+        cout << setw(5) << left << i + 1
+             << setw(15) << left << danhSach[i].mssv
+             << setw(25) << left << danhSach[i].hoTen
+             << setw(10) << left << fixed << setprecision(2) << danhSach[i].diem << endl;
+    }
+    cout << "=======================================================\n";
+}
+
+void xoaSinhVien(SinhVien* danhSach, int &n) {
+    if (n == 0) {
+        cout << "\nDanh sach trong, khong the xoa!\n";
+        return;
+    }
+    string mssvXoa;
+    cout << "\nNhap MSSV can xoa: ";
+    cin >> mssvXoa;
+
+    int index = -1;
+    for (int i = 0; i < n; i++) {
+        if (danhSach[i].mssv == mssvXoa) {
+            index = i;
+            break;
+        }
+    }
+
+    if (index == -1) {
+        cout << "=> Khong tim thay sinh vien co MSSV: " << mssvXoa << endl;
+    } else {
+        for (int i = index; i < n - 1; i++) {
+            danhSach[i] = danhSach[i + 1];
+        }
+        n--; 
+        cout << "=> Da xoa sinh vien co MSSV: " << mssvXoa << endl;
+    }
+}
+
+void timKiemSinhVien(SinhVien* danhSach, int n) {
+    if (n == 0) {
+        cout << "\nDanh sach trong!\n";
+        return;
+    }
+    cout << "\nNhap tu khoa tim kiem (MSSV hoac Ten): ";
+    cin.ignore();
+    string tuKhoa;
+    getline(cin, tuKhoa);
+
+    bool found = false;
+    cout << "\n--- KET QUA TIM KIEM ---\n";
+    for (int i = 0; i < n; i++) {
+        if (danhSach[i].mssv.find(tuKhoa) != string::npos || 
+            danhSach[i].hoTen.find(tuKhoa) != string::npos) {
+            cout << "[" << danhSach[i].mssv << "] - " << danhSach[i].hoTen << " - Diem: " << danhSach[i].diem << endl;
+            found = true;
+        }
+    }
+    if (!found) {
+        cout << "=> Khong tim thay sinh vien nao khop voi tu khoa.\n";
+    }
+}
+
+void sapXepGiamDan(SinhVien* danhSach, int n) {
+    if (n == 0) return;
+    
+    for (int i = 0; i < n - 1; i++) {
+        int maxIndex = i;
+        for (int j = i + 1; j < n; j++) {
+            if (danhSach[j].diem > danhSach[maxIndex].diem) {
+                maxIndex = j;
+            }
+        }
+        if (maxIndex != i) {
+            SinhVien temp = danhSach[i];
+            danhSach[i] = danhSach[maxIndex];
+            danhSach[maxIndex] = temp;
+        }
+    }
+    cout << "=> Da sap xep danh sach theo diem GIAM DAN.\n";
+    hienThiDanhSach(danhSach, n);
+}
+
+void xuatBaoCaoFile(SinhVien* danhSach, int n) {
+    if (n == 0) {
+        cout << "\nDanh sach trong, khong the xuat bao cao!\n";
+        return;
+    }
+
+    float tong = 0;
+    float maxDiem = danhSach[0].diem;
+    float minDiem = danhSach[0].diem;
+    
+    for (int i = 0; i < n; i++) {
+        tong += danhSach[i].diem;
+        if (danhSach[i].diem > maxDiem) maxDiem = danhSach[i].diem;
+        if (danhSach[i].diem < minDiem) minDiem = danhSach[i].diem;
+    }
+    float trungBinh = tong / n;
+
+    ofstream outFile("diem_sinhvien.txt");
+    if (!outFile) {
+        cout << "=> Loi: Khong the tao hoac mo file de ghi!\n";
+        return;
+    }
+
+    outFile << "================ BAO CAO DIEM SINH VIEN ================\n\n";
+    outFile << setfill(' ') << setw(5) << left << "STT" 
+            << setw(15) << left << "MSSV" 
+            << setw(25) << left << "Ho va Ten" 
+            << setw(10) << left << "Diem" << endl;
+    outFile << "--------------------------------------------------------\n";
+    for (int i = 0; i < n; i++) {
+        outFile << setw(5) << left << i + 1
+                << setw(15) << left << danhSach[i].mssv
+                << setw(25) << left << danhSach[i].hoTen
+                << setw(10) << left << fixed << setprecision(2) << danhSach[i].diem << endl;
+    }
+    outFile << "--------------------------------------------------------\n";
+    outFile << "THONG KE CHUNG:\n";
+    outFile << "- Tong so sinh vien: " << n << endl;
+    outFile << "- Diem trung binh lop: " << fixed << setprecision(2) << trungBinh << endl;
+    outFile << "- Diem cao nhat: " << maxDiem << endl;
+    outFile << "- Diem thap nhat: " << minDiem << endl;
+    
+    outFile.close();
+    cout << "=> Xuat file 'diem_sinhvien.txt' va thong ke thanh cong!\n";
+}
+
+int main() {
+    int capacity = 2; 
+    int n = 0;        
+    SinhVien* danhSach = new SinhVien[capacity]; 
+
+    int luaChon;
+    do {
+        cout << "\n=== QUAN LY DIEM SINH VIEN ===\n";
+        cout << "1. Them sinh vien\n";
+        cout << "2. Xoa sinh vien\n";
+        cout << "3. Tim kiem\n";
+        cout << "4. Xep hang lop (Sap xep diem)\n";
+        cout << "5. Xuat bao cao (In file & Thong ke)\n";
+        cout << "6. Hien thi danh sach hien tai\n";
+        cout << "0. Thoat.\n";
+        cout << "Nhap lua chon cua bạn: ";
+        cin >> luaChon;
+
+        switch (luaChon) {
+            case 1:
+                themSinhVien(danhSach, n, capacity);
+                break;
+            case 2:
+                xoaSinhVien(danhSach, n);
+                break;
+            case 3:
+                timKiemSinhVien(danhSach, n);
+                break;
+            case 4:
+                sapXepGiamDan(danhSach, n);
+                break;
+            case 5:
+                xuatBaoCaoFile(danhSach, n);
+                break;
+            case 6:
+                hienThiDanhSach(danhSach, n);
+                break;
+            case 0:
+                cout << "\nTam biet!\n";
+                break;
+            default:
+                cout << "\nLua chon khong hop le. Vui long nhap lai!\n";
+        }
+    } while (luaChon != 0);
+
+    delete[] danhSach;
+    return 0;
+}
