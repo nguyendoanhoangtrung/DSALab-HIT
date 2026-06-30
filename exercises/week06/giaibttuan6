@@ -1,0 +1,410 @@
+Bài 1: Cài đặt Linked List ⭐⭐
+Cài đặt đầy đủ: thêm đầu, thêm cuối, xóa đầu, xóa cuối, xóa theo giá trị, tìm kiếm, in danh sách.
+#include <iostream>
+
+using namespace std;
+
+struct Node {
+    int data;
+    Node* next;
+};
+
+void themDau(Node* &head, int val) {
+    Node* newNode = new Node;
+    newNode->data = val;
+    newNode->next = head;
+    head = newNode;
+}
+
+void themCuoi(Node* &head, int val) {
+    Node* newNode = new Node;
+    newNode->data = val;
+    newNode->next = nullptr;
+    if (head == nullptr) {
+        head = newNode;
+        return;
+    }
+    Node* temp = head;
+    while (temp->next != nullptr) {
+        temp = temp->next;
+    }
+    temp->next = newNode;
+}
+
+void xoaDau(Node* &head) {
+    if (head == nullptr) return;
+    Node* temp = head;
+    head = head->next;
+    delete temp;
+}
+
+void xoaCuoi(Node* &head) {
+    if (head == nullptr) return;
+    if (head->next == nullptr) {
+        delete head;
+        head = nullptr;
+        return;
+    }
+    Node* temp = head;
+    while (temp->next->next != nullptr) {
+        temp = temp->next;
+    }
+    delete temp->next;
+    temp->next = nullptr;
+}
+
+void xoaTheoGiaTri(Node* &head, int val) {
+    if (head == nullptr) return;
+    if (head->data == val) {
+        xoaDau(head);
+        return;
+    }
+    Node* temp = head;
+    while (temp->next != nullptr && temp->next->data != val) {
+        temp = temp->next;
+    }
+    if (temp->next != nullptr) {
+        Node* nodeXoa = temp->next;
+        temp->next = temp->next->next;
+        delete nodeXoa;
+    }
+}
+
+bool timKiem(Node* head, int val) {
+    Node* temp = head;
+    while (temp != nullptr) {
+        if (temp->data == val) return true;
+        temp = temp->next;
+    }
+    return false;
+}
+
+void inDanhSach(Node* head) {
+    Node* temp = head;
+    while (temp != nullptr) {
+        cout << temp->data << " -> ";
+        temp = temp->next;
+    }
+    cout << "NULL\n";
+}
+
+void giaiPhong(Node* &head) {
+    while (head != nullptr) {
+        xoaDau(head);
+    }
+}
+
+int main() {
+    Node* head = nullptr;
+
+    themDau(head, 10);
+    themDau(head, 20);
+    themCuoi(head, 30);
+    themCuoi(head, 40);
+    cout << "Danh sach ban dau: ";
+    inDanhSach(head);
+
+    xoaDau(head);
+    cout << "Sau khi xoa dau: ";
+    inDanhSach(head);
+
+    xoaCuoi(head);
+    cout << "Sau khi xoa cuoi: ";
+    inDanhSach(head);
+
+    xoaTheoGiaTri(head, 10);
+    cout << "Sau khi xoa gia tri 10: ";
+    inDanhSach(head);
+
+    cout << "Tim kiem 30: " << (timKiem(head, 30) ? "Thay" : "Khong thay") << endl;
+
+    giaiPhong(head);
+    return 0;
+}
+Bài 2: Đảo ngược danh sách ⭐⭐
+Đảo ngược Linked List bằng 2 cách: iterative (3 con trỏ) và recursive. So sánh.
+#include <iostream>
+
+using namespace std;
+
+struct Node {
+    int data;
+    Node* next;
+};
+
+void themCuoi(Node* &head, int val) {
+    Node* newNode = new Node{val, nullptr};
+    if (head == nullptr) {
+        head = newNode;
+        return;
+    }
+    Node* temp = head;
+    while (temp->next != nullptr) temp = temp->next;
+    temp->next = newNode;
+}
+
+void inDanhSach(Node* head) {
+    Node* temp = head;
+    while (temp != nullptr) {
+        cout << temp->data << " -> ";
+        temp = temp->next;
+    }
+    cout << "NULL\n";
+}
+
+void daoNguocVongLap(Node* &head) {
+    Node* prev = nullptr;
+    Node* current = head;
+    Node* next = nullptr;
+    while (current != nullptr) {
+        next = current->next;
+        current->next = prev;
+        prev = current;
+        current = next;
+    }
+    head = prev;
+}
+
+Node* daoNguocDeQuy(Node* head) {
+    if (head == nullptr || head->next == nullptr) return head;
+    Node* rest = daoNguocDeQuy(head->next);
+    head->next->next = head;
+    head->next = nullptr;
+    return rest;
+}
+
+void giaiPhong(Node* &head) {
+    while (head != nullptr) {
+        Node* temp = head;
+        head = head->next;
+        delete temp;
+    }
+}
+
+int main() {
+    Node* head = nullptr;
+    themCuoi(head, 1);
+    themCuoi(head, 2);
+    themCuoi(head, 3);
+    themCuoi(head, 4);
+
+    cout << "Danh sach goc: ";
+    inDanhSach(head);
+
+    daoNguocVongLap(head);
+    cout << "Sau khi dao nguoc bang Vong Lap: ";
+    inDanhSach(head);
+
+    head = daoNguocDeQuy(head);
+    cout << "Sau khi dao nguoc bang De Quy (tra lai nhu cu): ";
+    inDanhSach(head);
+
+    giaiPhong(head);
+    return 0;
+}
+Bài 3: Phát hiện vòng lặp ⭐⭐⭐
+Cài đặt Floyd's Cycle Detection (slow/fast pointer). Tìm điểm bắt đầu vòng lặp.
+#include <iostream>
+
+using namespace std;
+
+struct Node {
+    int data;
+    Node* next;
+};
+
+void themCuoi(Node* &head, int val) {
+    Node* newNode = new Node{val, nullptr};
+    if (head == nullptr) {
+        head = newNode;
+        return;
+    }
+    Node* temp = head;
+    while (temp->next != nullptr) temp = temp->next;
+    temp->next = newNode;
+}
+
+Node* phatHienVongLap(Node* head) {
+    Node* slow = head;
+    Node* fast = head;
+    while (fast != nullptr && fast->next != nullptr) {
+        slow = slow->next;
+        fast = fast->next->next;
+        if (slow == fast) return slow;
+    }
+    return nullptr;
+}
+
+Node* timDiemBatDauVongLap(Node* head) {
+    Node* giaoDiem = phatHienVongLap(head);
+    if (giaoDiem == nullptr) return nullptr;
+    
+    Node* p1 = head;
+    Node* p2 = giaoDiem;
+    while (p1 != p2) {
+        p1 = p1->next;
+        p2 = p2->next;
+    }
+    return p1;
+}
+
+int main() {
+    Node* head = nullptr;
+    themCuoi(head, 10);
+    themCuoi(head, 20);
+    themCuoi(head, 30);
+    themCuoi(head, 40);
+    themCuoi(head, 50);
+
+    Node* temp = head;
+    while (temp->next != nullptr) temp = temp->next;
+    Node* duoi = temp;
+
+    Node* nutThuBa = head->next->next; 
+    duoi->next = nutThuBa; 
+
+    Node* diemBatDau = timDiemBatDauVongLap(head);
+    if (diemBatDau != nullptr) {
+        cout << "Phat hien co vong lap trong Linked List!\n";
+        cout << "Diem bat dau cua vong lap tai nut co gia tri: " << diemBatDau->data << endl;
+    } else {
+        cout << "Danh sach khong co vong lap.\n";
+    }
+
+    duoi->next = nullptr;
+    while (head != nullptr) {
+        Node* t = head;
+        head = head->next;
+        delete t;
+    }
+    return 0;
+}
+Bài 4: 🔥 Dự Án Mini — Lịch Sử Trình Duyệt ⭐⭐⭐
+#include <iostream>
+#include <string>
+
+using namespace std;
+
+struct Node {
+    string url;
+    Node* next;
+};
+
+void visitPage(Node* &head, Node* &current, int &size, string newUrl) {
+    while (current != nullptr && current->next != nullptr) {
+        Node* temp = current->next;
+        current->next = temp->next;
+        delete temp;
+        size--;
+    }
+
+    Node* newNode = new Node{newUrl, nullptr};
+    if (head == nullptr) {
+        head = newNode;
+        current = newNode;
+        size = 1;
+    } else {
+        if (size >= 50) {
+            Node* temp = head;
+            head = head->next;
+            delete temp;
+            size--;
+        }
+        current->next = newNode;
+        current = newNode;
+        size++;
+    }
+    cout << "=> Da mo trang: " << current->url << endl;
+}
+
+void backPage(Node* head, Node* &current) {
+    if (current == head || current == nullptr) {
+        cout << "<- Khong the quay lai (Dang o dau lich su)\n";
+        return;
+    }
+    Node* temp = head;
+    while (temp->next != current) {
+        temp = temp->next;
+    }
+    current = temp;
+    cout << "<- Quay lai: " << current->url << endl;
+}
+
+void forwardPage(Node* &current) {
+    if (current == nullptr || current->next == nullptr) {
+        cout << "-> Khong the tien toi (Dang o trang moi nhat)\n";
+        return;
+    }
+    current = current->next;
+    cout << "-> Tien toi: " << current->url << endl;
+}
+
+void showHistory(Node* head, Node* current) {
+    if (head == nullptr) {
+        cout << "Lich su trong!\n";
+        return;
+    }
+    cout << "\n📋 Lich su trinh duyet:\n";
+    Node* temp = head;
+    while (temp != nullptr) {
+        cout << temp->url;
+        if (temp == current) {
+            cout << " [Dang o day]";
+        }
+        if (temp->next != nullptr) {
+            cout << " -> ";
+        }
+        temp = temp->next;
+    }
+    cout << endl;
+}
+
+void clearHistory(Node* &head, Node* &current, int &size) {
+    while (head != nullptr) {
+        Node* temp = head;
+        head = head->next;
+        delete temp;
+    }
+    current = nullptr;
+    size = 0;
+    cout << "=> Da xoa sach lich su trinh duyet!\n";
+}
+
+int main() {
+    Node* head = nullptr;
+    Node* current = nullptr;
+    int size = 0;
+
+    int luaChon;
+    string urlInput;
+
+    do {
+        cout << "\n=== TRINH DUYET WEB (Linked List) ===\n";
+        cout << "1. Visit (Truy cap trang moi)\n";
+        cout << "2. Back (Quay lai)\n";
+        cout << "3. Forward (Tien toi)\n";
+        cout << "4. History (Xem lich su)\n";
+        cout << "5. Clear (Xoa lich su)\n";
+        cout << "0. Thoat\n";
+        cout << "Nhap lua chon cua ban: ";
+        cin >> luaChon;
+        cin.ignore();
+
+        if (luaChon == 1) {
+            cout << "Nhap URL: ";
+            getline(cin, urlInput);
+            visitPage(head, current, size, urlInput);
+        } else if (luaChon == 2) {
+            backPage(head, current);
+        } else if (luaChon == 3) {
+            forwardPage(current);
+        } else if (luaChon == 4) {
+            showHistory(head, current);
+        } else if (luaChon == 5) {
+            clearHistory(head, current, size);
+        }
+    } while (luaChon != 0);
+
+    clearHistory(head, current, size);
+    return 0;
+}
