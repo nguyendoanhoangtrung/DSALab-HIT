@@ -1,0 +1,426 @@
+Bài 1: Cài đặt 3 thuật toán ⭐⭐
+#include <iostream>
+
+using namespace std;
+
+void inMang(int arr[], int n) {
+    for (int i = 0; i < n; i++) {
+        cout << arr[i] << " ";
+    }
+    cout << endl;
+}
+
+void bubbleSort(int arr[], int n) {
+    int* tempArr = new int[n];
+    for (int i = 0; i < n; i++) tempArr[i] = arr[i];
+
+    cout << "\n--- BUBBLE SORT STAGES ---\n";
+    for (int i = 0; i < n - 1; i++) {
+        for (int j = 0; j < n - i - 1; j++) {
+            if (tempArr[j] > tempArr[j + 1]) {
+                int temp = tempArr[j];
+                tempArr[j] = tempArr[j + 1];
+                tempArr[j + 1] = temp;
+            }
+        }
+        cout << "Buoc " << i + 1 << ": ";
+        inMang(tempArr, n);
+    }
+    delete[] tempArr;
+}
+
+void selectionSort(int arr[], int n) {
+    int* tempArr = new int[n];
+    for (int i = 0; i < n; i++) tempArr[i] = arr[i];
+
+    cout << "\n--- SELECTION SORT STAGES ---\n";
+    for (int i = 0; i < n - 1; i++) {
+        int minIdx = i;
+        for (int j = i + 1; j < n; j++) {
+            if (tempArr[j] < tempArr[minIdx]) {
+                minIdx = j;
+            }
+        }
+        int temp = tempArr[minIdx];
+        tempArr[minIdx] = tempArr[i];
+        tempArr[i] = temp;
+
+        cout << "Buoc " << i + 1 << ": ";
+        inMang(tempArr, n);
+    }
+    delete[] tempArr;
+}
+
+void insertionSort(int arr[], int n) {
+    int* tempArr = new int[n];
+    for (int i = 0; i < n; i++) tempArr[i] = arr[i];
+
+    cout << "\n--- INSERTION SORT STAGES ---\n";
+    for (int i = 1; i < n; i++) {
+        int key = tempArr[i];
+        int j = i - 1;
+        while (j >= 0 && tempArr[j] > key) {
+            tempArr[j + 1] = tempArr[j];
+            j--;
+        }
+        tempArr[j + 1] = key;
+
+        cout << "Buoc " << i << ": ";
+        inMang(tempArr, n);
+    }
+    delete[] tempArr;
+}
+
+int main() {
+    int n;
+    cout << "Nhap so phan tu n: ";
+    cin >> n;
+    int* arr = new int[n];
+    for (int i = 0; i < n; i++) {
+        cout << "Nhap phan tu " << i << ": ";
+        cin >> arr[i];
+    }
+
+    bubbleSort(arr, n);
+    selectionSort(arr, n);
+    insertionSort(arr, n);
+
+    delete[] arr;
+    return 0;
+}
+Bài 2: Đếm số phép so sánh và hoán vị ⭐⭐
+#include <iostream>
+#include <iomanip>
+#include <cstdlib>
+
+using namespace std;
+
+void taoMangNgauNhien(int arr[], int n) {
+    for (int i = 0; i < n; i++) {
+        arr[i] = rand() % 500;
+    }
+}
+
+void saoChepMang(int nguon[], int dich[], int n) {
+    for (int i = 0; i < n; i++) {
+        dich[i] = nguon[i];
+    }
+}
+
+void demBubbleSort(int arr[], int n, long long &soSanh, long long &hoanVi) {
+    soSanh = 0;
+    hoanVi = 0;
+    for (int i = 0; i < n - 1; i++) {
+        for (int j = 0; j < n - i - 1; j++) {
+            soSanh++;
+            if (arr[j] > arr[j + 1]) {
+                int temp = arr[j];
+                arr[j] = arr[j + 1];
+                arr[j + 1] = temp;
+                hoanVi++;
+            }
+        }
+    }
+}
+
+void demSelectionSort(int arr[], int n, long long &soSanh, long long &hoanVi) {
+    soSanh = 0;
+    hoanVi = 0;
+    for (int i = 0; i < n - 1; i++) {
+        int minIdx = i;
+        for (int j = i + 1; j < n; j++) {
+            soSanh++;
+            if (arr[j] < arr[minIdx]) {
+                minIdx = j;
+            }
+        }
+        if (minIdx != i) {
+            int temp = arr[minIdx];
+            arr[minIdx] = arr[i];
+            arr[i] = temp;
+            hoanVi++;
+        }
+    }
+}
+
+void demInsertionSort(int arr[], int n, long long &soSanh, long long &hoanVi) {
+    soSanh = 0;
+    hoanVi = 0;
+    for (int i = 1; i < n; i++) {
+        int key = arr[i];
+        int j = i - 1;
+        while (j >= 0) {
+            soSanh++;
+            if (arr[j] > key) {
+                arr[j + 1] = arr[j];
+                hoanVi++;
+                j--;
+            } else {
+                break;
+            }
+        }
+        if (j >= 0 && arr[j] <= key) {
+        }
+        arr[j + 1] = key;
+    }
+}
+
+int main() {
+    int n = 100;
+    int* mangGoc = new int[n];
+    int* mangPhu = new int[n];
+
+    taoMangNgauNhien(mangGoc, n);
+
+    long long ssBubble = 0, hvBubble = 0;
+    long long ssSelect = 0, hvSelect = 0;
+    long long ssInsert = 0, hvInsert = 0;
+
+    saoChepMang(mangGoc, mangPhu, n);
+    demBubbleSort(mangPhu, n, ssBubble, hvBubble);
+
+    saoChepMang(mangGoc, mangPhu, n);
+    demSelectionSort(mangPhu, n, ssSelect, hvSelect);
+
+    saoChepMang(mangGoc, mangPhu, n);
+    demInsertionSort(mangPhu, n, ssInsert, hvInsert);
+
+    cout << "\n======================================================\n";
+    cout << setw(20) << left << "Thuat Toan" 
+         << setw(20) << left << "So phep So Sanh" 
+         << setw(20) << left << "So phep Hoan Vi/Dich" << endl;
+    cout << "------------------------------------------------------\n";
+    cout << setw(20) << left << "Bubble Sort" 
+         << setw(20) << left << ssBubble 
+         << setw(20) << left << hvBubble << endl;
+    cout << setw(20) << left << "Selection Sort" 
+         << setw(20) << left << ssSelect 
+         << setw(20) << left << hvSelect << endl;
+    cout << setw(20) << left << "Insertion Sort" 
+         << setw(20) << left << ssInsert 
+         << setw(20) << left << hvInsert << endl;
+    cout << "======================================================\n";
+
+    delete[] mangGoc;
+    delete[] mangPhu;
+    return 0;
+}
+Bài 3: Best / Worst / Average Case ⭐⭐
+#include <iostream>
+#include <chrono>
+#include <iomanip>
+#include <cstdlib>
+
+using namespace std;
+using namespace std::chrono;
+
+void taoMangTangDan(int arr[], int n) {
+    for (int i = 0; i < n; i++) arr[i] = i;
+}
+
+void taoMangGiamDan(int arr[], int n) {
+    for (int i = 0; i < n; i++) arr[i] = n - i;
+}
+
+void taoMangNgauNhien(int arr[], int n) {
+    for (int i = 0; i < n; i++) arr[i] = rand() % 10000;
+}
+
+void saoChepMang(int nguon[], int dich[], int n) {
+    for (int i = 0; i < n; i++) dich[i] = nguon[i];
+}
+
+void bubbleSort(int arr[], int n) {
+    for (int i = 0; i < n - 1; i++) {
+        bool swapped = false;
+        for (int j = 0; j < n - i - 1; j++) {
+            if (arr[j] > arr[j + 1]) {
+                int temp = arr[j];
+                arr[j] = arr[j + 1];
+                arr[j + 1] = temp;
+                swapped = true;
+            }
+        }
+        if (!swapped) break;
+    }
+}
+
+void selectionSort(int arr[], int n) {
+    for (int i = 0; i < n - 1; i++) {
+        int minIdx = i;
+        for (int j = i + 1; j < n; j++) {
+            if (arr[j] < arr[minIdx]) minIdx = j;
+        }
+        int temp = arr[minIdx];
+        arr[minIdx] = arr[i];
+        arr[i] = temp;
+    }
+}
+
+void insertionSort(int arr[], int n) {
+    for (int i = 1; i < n; i++) {
+        int key = arr[i];
+        int j = i - 1;
+        while (j >= 0 && arr[j] > key) {
+            arr[j + 1] = arr[j];
+            j--;
+        }
+        arr[j + 1] = key;
+    }
+}
+
+double doThoiGian(void (*sortFunc)(int[], int), int arr[], int n) {
+    auto start = high_resolution_clock::now();
+    sortFunc(arr, n);
+    auto end = high_resolution_clock::now();
+    return duration<double, milli>(end - start).count();
+}
+
+int main() {
+    int n = 5000;
+    int* goc = new int[n];
+    int* phu = new int[n];
+
+    double bBest, bWorst, bAvg;
+    double sBest, sWorst, sAvg;
+    double iBest, iWorst, iAvg;
+
+    taoMangTangDan(goc, n);
+    saoChepMang(goc, phu, n); bBest = doThoiGian(bubbleSort, phu, n);
+    saoChepMang(goc, phu, n); sBest = doThoiGian(selectionSort, phu, n);
+    saoChepMang(goc, phu, n); iBest = doThoiGian(insertionSort, phu, n);
+
+    taoMangGiamDan(goc, n);
+    saoChepMang(goc, phu, n); bWorst = doThoiGian(bubbleSort, phu, n);
+    saoChepMang(goc, phu, n); sWorst = doThoiGian(selectionSort, phu, n);
+    saoChepMang(goc, phu, n); iWorst = doThoiGian(insertionSort, phu, n);
+
+    taoMangNgauNhien(goc, n);
+    saoChepMang(goc, phu, n); bAvg = doThoiGian(bubbleSort, phu, n);
+    saoChepMang(goc, phu, n); sAvg = doThoiGian(selectionSort, phu, n);
+    saoChepMang(goc, phu, n); iAvg = doThoiGian(insertionSort, phu, n);
+
+    cout << "\n=== BANG THOI GIAN CHAY VOI N = " << n << " (Don vi: ms) ===\n\n";
+    cout << setw(18) << left << "Thuat Toan" 
+         << setw(15) << left << "Best Case" 
+         << setw(15) << left << "Worst Case" 
+         << setw(15) << left << "Average Case" << endl;
+    cout << "---------------------------------------------------------\n";
+    cout << setw(18) << left << "Bubble Sort" << setw(15) << fixed << setprecision(3) << bBest << setw(15) << bWorst << setw(15) << bAvg << endl;
+    cout << setw(18) << left << "Selection Sort" << setw(15) << fixed << setprecision(3) << sBest << setw(15) << sWorst << setw(15) << sAvg << endl;
+    cout << setw(18) << left << "Insertion Sort" << setw(15) << fixed << setprecision(3) << iBest << setw(15) << iWorst << setw(15) << iAvg << endl;
+    cout << "=========================================================\n\n";
+
+    cout << "--- KET LUAN LUA CHON THUAT TOAN ---\n";
+    cout << "1. Dung Insertion Sort khi mang da gan nhu sap xep xong (Thoi gian gan nhu tuyen tinh O(n)).\n";
+    cout << "2. Selection Sort co thoi gian luon on dinh trong moi truong hop, nen dung khi muon giam thieu so lan doi cho (ghi du lieu vao o nho).\n";
+    cout << "3. Bubble Sort co hieu nang kem nhat trong thuc te, chu yeu mang tinh chat minh hoa hoc thuat.\n";
+
+    delete[] goc;
+    delete[] phu;
+    return 0;
+}
+Bài 4: 🔥 Dự Án Mini — Sorting Visualizer (Console) ⭐⭐⭐
+#include <iostream>
+#include <thread>
+#include <chrono>
+
+using namespace std;
+
+void xoaManHinh() {
+    cout << "\033[2J\033[1;1H";
+}
+
+void veThanhGiaoDien(int value, bool dangSoSanh) {
+    if (dangSoSanh) {
+        cout << "\033[31m";
+    } else {
+        cout << "\033[32m";
+    }
+    for (int i = 0; i < value; i++) {
+        cout << "X";
+    }
+    cout << "\033[0m " << value << endl;
+}
+
+void hienThiMang(int arr[], int n, int idx1, int idx2, string thuatToan, int buoc, int tongBuoc) {
+    xoaManHinh();
+    cout << "=== " << thuatToan << " --- Buoc: " << buoc << "/" << tongBuoc << " ===\n\n";
+    for (int i = 0; i < n; i++) {
+        if (i == idx1 || i == idx2) {
+            veThanhGiaoDien(arr[i], true);
+        } else {
+            veThanhGiaoDien(arr[i], false);
+        }
+    }
+    cout << "\nDang so sanh: vi tri [" << idx1 << "] va [" << idx2 << "]\n";
+    this_thread::sleep_for(chrono::milliseconds(200));
+}
+
+void visualizerBubbleSort(int arr[], int n) {
+    int buoc = 0;
+    int tongBuoc = (n * (n - 1)) / 2;
+    for (int i = 0; i < n - 1; i++) {
+        for (int j = 0; j < n - i - 1; j++) {
+            buoc++;
+            hienThiMang(arr, n, j, j + 1, "BUBBLE SORT", buoc, tongBuoc);
+            if (arr[j] > arr[j + 1]) {
+                int temp = arr[j];
+                arr[j] = arr[j + 1];
+                arr[j + 1] = temp;
+            }
+        }
+    }
+}
+
+void visualizerSelectionSort(int arr[], int n) {
+    int buoc = 0;
+    int tongBuoc = (n * (n - 1)) / 2;
+    for (int i = 0; i < n - 1; i++) {
+        int minIdx = i;
+        for (int j = i + 1; j < n; j++) {
+            buoc++;
+            hienThiMang(arr, n, minIdx, j, "SELECTION SORT", buoc, tongBuoc);
+            if (arr[j] < arr[minIdx]) {
+                minIdx = j;
+            }
+        }
+        int temp = arr[minIdx];
+        arr[minIdx] = arr[i];
+        arr[i] = temp;
+    }
+}
+
+int main() {
+    int n = 8;
+    int mangGoc[] = {17, 12, 22, 8, 15, 5, 19, 10};
+    int* arr = new int[n];
+
+    int luaChon;
+    do {
+        for (int i = 0; i < n; i++) arr[i] = mangGoc[i];
+        
+        xoaManHinh();
+        cout << "=== CONSOLE SORTING VISUALIZER ===\n";
+        cout << "1. Chay mo phong Bubble Sort\n";
+        cout << "2. Chay mo phong Selection Sort\n";
+        cout << "0. Thoat\n";
+        cout << "Nhap lua chon cua ban: ";
+        cin >> luaChon;
+
+        if (luaChon == 1) {
+            visualizerBubbleSort(arr, n);
+            cout << "\n=> Da sap xep xong bang Bubble Sort! Bam Enter de quay lai.";
+            cin.ignore();
+            cin.get();
+        } else if (luaChon == 2) {
+            visualizerSelectionSort(arr, n);
+            cout << "\n=> Da sap xep xong bang Selection Sort! Bam Enter de quay lai.";
+            cin.ignore();
+            cin.get();
+        }
+    } while (luaChon != 0);
+
+    delete[] arr;
+    return 0;
+}
