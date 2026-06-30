@@ -1,0 +1,434 @@
+Bài 1: Cài đặt Stack ⭐⭐
+Cài đặt Stack bằng mảng (array-based) và bằng Linked List. So sánh ưu nhược điểm.
+#include <iostream>
+
+using namespace std;
+
+struct ArrayStack {
+    int* data;
+    int topIndex;
+    int capacity;
+};
+
+void initArray(ArrayStack &s, int cap) {
+    s.capacity = cap;
+    s.topIndex = -1;
+    s.data = new int[cap];
+}
+
+bool isEmptyArray(ArrayStack s) {
+    return s.topIndex == -1;
+}
+
+bool isFullArray(ArrayStack s) {
+    return s.topIndex == s.capacity - 1;
+}
+
+void pushArray(ArrayStack &s, int val) {
+    if (isFullArray(s)) return;
+    s.topIndex++;
+    s.data[s.topIndex] = val;
+}
+
+void popArray(ArrayStack &s) {
+    if (isEmptyArray(s)) return;
+    s.topIndex--;
+}
+
+int topArray(ArrayStack s) {
+    if (isEmptyArray(s)) return -1;
+    return s.data[s.topIndex];
+}
+
+void freeArray(ArrayStack &s) {
+    delete[] s.data;
+}
+
+struct Node {
+    int data;
+    Node* next;
+};
+
+struct ListStack {
+    Node* topNode;
+};
+
+void initList(ListStack &s) {
+    s.topNode = nullptr;
+}
+
+bool isEmptyList(ListStack s) {
+    return s.topNode == nullptr;
+}
+
+void pushList(ListStack &s, int val) {
+    Node* newNode = new Node{val, s.topNode};
+    s.topNode = newNode;
+}
+
+void popList(ListStack &s) {
+    if (isEmptyList(s)) return;
+    Node* temp = s.topNode;
+    s.topNode = s.topNode->next;
+    delete temp;
+}
+
+int topList(ListStack s) {
+    if (isEmptyList(s)) return -1;
+    return s.topNode->data;
+}
+
+void freeList(ListStack &s) {
+    while (!isEmptyList(s)) {
+        popList(s);
+    }
+}
+
+int main() {
+    ArrayStack s1;
+    initArray(s1, 5);
+    pushArray(s1, 10);
+    pushArray(s1, 20);
+    cout << "ArrayStack Top: " << topArray(s1) << endl;
+    popArray(s1);
+    cout << "ArrayStack Top sau khi Pop: " << topArray(s1) << endl;
+    freeArray(s1);
+
+    ListStack s2;
+    initList(s2);
+    pushList(s2, 100);
+    pushList(s2, 200);
+    cout << "ListStack Top: " << topList(s2) << endl;
+    popList(s2);
+    cout << "ListStack Top sau khi Pop: " << topList(s2) << endl;
+    freeList(s2);
+
+    cout << "\n=== SO SANH UU NHUOC DIEM ===\n";
+    cout << "1. Stack dung Mang: Truy cap nhanh O(1), ton it bo nho cho con tro, nhung kich thuoc co dinh de bi loi Full Stack.\n";
+    cout << "2. Stack dung DSLK: Linh hoat, khong lo bi day dung luong, nhung ton them bo nho de luu bien con tro 'next' va cap phat dong cham hon.\n";
+
+    return 0;
+}
+Bài 2: Kiểm tra ngoặc hợp lệ ⭐⭐
+Kiểm tra chuỗi có đóng mở ngoặc (), [], {} hợp lệ không. Xử lý cả chuỗi code thực tế.
+#include <iostream>
+#include <string>
+
+using namespace std;
+
+struct Node {
+    char data;
+    Node* next;
+};
+
+void push(Node* &top, char c) {
+    Node* newNode = new Node{c, top};
+    top = newNode;
+}
+
+void pop(Node* &top) {
+    if (top == nullptr) return;
+    Node* temp = top;
+    top = top->next;
+    delete temp;
+}
+
+char getTop(Node* top) {
+    if (top == nullptr) return '\0';
+    return top->data;
+}
+
+bool isEmpty(Node* top) {
+    return top == nullptr;
+}
+
+bool kiemTraHopLe(string bieuThuc) {
+    Node* stack = nullptr;
+    for (int i = 0; i < bieuThuc.length(); i++) {
+        char c = bieuThuc[i];
+        if (c == '(' || c == '[' || c == '{') {
+            push(stack, c);
+        } else if (c == ')' || c == ']' || c == '}') {
+            if (isEmpty(stack)) return false;
+            char mo = getTop(stack);
+            if ((c == ')' && mo == '(') || 
+                (c == ']' && mo == '[') || 
+                (c == '}' && mo == '{')) {
+                pop(stack);
+            } else {
+                while (!isEmpty(stack)) pop(stack);
+                return false;
+            }
+        }
+    }
+    bool ketQua = isEmpty(stack);
+    while (!isEmpty(stack)) pop(stack);
+    return ketQua;
+}
+
+int main() {
+    string code1 = "if (arr[i] == {x}) { return (x + 1); }";
+    string code2 = "if (arr[i] == {x) { return (x + 1); }";
+
+    cout << "Chuoi 1: " << code1 << " -> " << (kiemTraHopLe(code1) ? "HOP LE" : "KHONG HOP LE") << endl;
+    cout << "Chuoi 2: " << code2 << " -> " << (kiemTraHopLe(code2) ? "HOP LE" : "KHONG HOP LE") << endl;
+
+    return 0;
+}
+Bài 3: Chuyển đổi biểu thức ⭐⭐⭐
+Chuyển biểu thức Infix → Postfix → Prefix. In từng bước.
+#include <iostream>
+#include <string>
+
+using namespace std;
+
+struct Node {
+    char data;
+    Node* next;
+};
+
+void push(Node* &top, char c) {
+    Node* newNode = new Node{c, top};
+    top = newNode;
+}
+
+char pop(Node* &top) {
+    if (top == nullptr) return '\0';
+    Node* temp = top;
+    char res = temp->data;
+    top = top->next;
+    delete temp;
+    return res;
+}
+
+char peek(Node* top) {
+    if (top == nullptr) return '\0';
+    return top->data;
+}
+
+bool isEmpty(Node* top) {
+    return top == nullptr;
+}
+
+int uuTien(char c) {
+    if (c == '^') return 3;
+    if (c == '*' || c == '/') return 2;
+    if (c == '+' || c == '-') return 1;
+    return 0;
+}
+
+void inStack(Node* top) {
+    cout << "Stack: [";
+    Node* temp = top;
+    string s = "";
+    while (temp != nullptr) {
+        s = temp->data + s;
+        temp = temp->next;
+    }
+    for (int i = 0; i < s.length(); i++) {
+        cout << s[i] << (i == s.length() - 1 ? "" : ", ");
+    }
+    cout << "]";
+}
+
+string infixToPostfix(string infix) {
+    Node* stack = nullptr;
+    string postfix = "";
+    int buoc = 1;
+
+    cout << "\n--- QUA TRINH CHUYEN DOI ---\n";
+    for (int i = 0; i < infix.length(); i++) {
+        char c = infix[i];
+        if (c == ' ') continue;
+
+        if (isalnum(c)) {
+            postfix += c;
+        } else if (c == '(') {
+            push(stack, c);
+        } else if (c == ')') {
+            while (!isEmpty(stack) && peek(stack) != '(') {
+                postfix += pop(stack);
+            }
+            pop(stack);
+        } else {
+            while (!isEmpty(stack) && uuTien(peek(stack)) >= uuTien(c)) {
+                postfix += pop(stack);
+            }
+            push(stack, c);
+        }
+
+        cout << "Buoc " << buoc++ << " | Ky tu: " << c << " | ";
+        inStack(stack);
+        cout << " | Postfix: " << postfix << endl;
+    }
+
+    while (!isEmpty(stack)) {
+        postfix += pop(stack);
+        cout << "Buoc " << buoc++ << " | Lay het tu Stack | ";
+        inStack(stack);
+        cout << " | Postfix: " << postfix << endl;
+    }
+
+    return postfix;
+}
+
+int main() {
+    string infix = "(A+B)*C-D/E";
+    cout << "Bieu thuc Infix: " << infix << endl;
+    string postfix = infixToPostfix(infix);
+    cout << "\n=> Ket qua Postfix: " << postfix << endl;
+    return 0;
+}
+Bài 4: 🔥 Dự Án Mini — Máy Tính Biểu Thức ⭐⭐⭐
+#include <iostream>
+#include <string>
+#include <cmath>
+
+using namespace std;
+
+struct CharNode {
+    char data;
+    CharNode* next;
+};
+
+void pushChar(CharNode* &top, char c) {
+    top = new CharNode{c, top};
+}
+
+char popChar(CharNode* &top) {
+    if (top == nullptr) return '\0';
+    CharNode* t = top;
+    char res = t->data;
+    top = top->next;
+    delete t;
+    return res;
+}
+
+int uuTien(char c) {
+    if (c == '^') return 3;
+    if (c == '*' || c == '/') return 2;
+    if (c == '+' || c == '-') return 1;
+    return 0;
+}
+
+string bieuThucToPostfix(string infix) {
+    CharNode* stack = nullptr;
+    string postfix = "";
+    for (int i = 0; i < infix.length(); i++) {
+        char c = infix[i];
+        if (c == ' ') continue;
+
+        if (isdigit(c) || c == '.') {
+            while (i < infix.length() && (isdigit(infix[i]) || infix[i] == '.')) {
+                postfix += infix[i];
+                i++;
+            }
+            postfix += ' ';
+            i--;
+        } else if (c == '(') {
+            pushChar(stack, c);
+        } else if (c == ')') {
+            while (stack != nullptr && stack->data != '(') {
+                postfix += popChar(stack);
+                postfix += ' ';
+            }
+            popChar(stack);
+        } else {
+            while (stack != nullptr && uuTien(stack->data) >= uuTien(c)) {
+                postfix += popChar(stack);
+                postfix += ' ';
+            }
+            pushChar(stack, c);
+        }
+    }
+    while (stack != nullptr) {
+        postfix += popChar(stack);
+        postfix += ' ';
+    }
+    return postfix;
+}
+
+struct DoubleNode {
+    double data;
+    DoubleNode* next;
+};
+
+void pushDouble(DoubleNode* &top, double v) {
+    top = new DoubleNode{v, top};
+}
+
+double popDouble(DoubleNode* &top) {
+    if (top == nullptr) return 0;
+    DoubleNode* t = top;
+    double res = t->data;
+    top = top->next;
+    delete t;
+    return res;
+}
+
+void inStackDouble(DoubleNode* top) {
+    cout << "Stack: [";
+    DoubleNode* temp = top;
+    string s = "";
+    while (temp != nullptr) {
+        s = to_string(temp->data) + (s == "" ? "" : ", ") + s;
+        temp = temp->next;
+    }
+    cout << s << "]";
+}
+
+double tinhToanPostfix(string postfix) {
+    DoubleNode* stack = nullptr;
+    cout << "\nBuoc 2 --- Tinh toan:\n";
+
+    for (int i = 0; i < postfix.length(); i++) {
+        char c = postfix[i];
+        if (c == ' ') continue;
+
+        if (isdigit(c) || c == '.') {
+            string numStr = "";
+            while (i < postfix.length() && (isdigit(postfix[i]) || postfix[i] == '.')) {
+                numStr += postfix[i];
+                i++;
+            }
+            double val = stod(numStr);
+            pushDouble(stack, val);
+            cout << "  Push " << val << " -> ";
+            inStackDouble(stack);
+            cout << endl;
+            i--;
+        } else {
+            double v2 = popDouble(stack);
+            double v1 = popDouble(stack);
+            double res = 0;
+
+            if (c == '+') res = v1 + v2;
+            else if (c == '-') res = v1 - v2;
+            else if (c == '*') res = v1 * v2;
+            else if (c == '/') res = v1 / v2;
+            else if (c == '^') res = pow(v1, v2);
+
+            pushDouble(stack, res);
+            cout << "  '" << c << "' -> Pop " << v2 << ", Pop " << v1 << " -> Push " << res << " -> ";
+            inStackDouble(stack);
+            cout << endl;
+        }
+    }
+    double ketQuaCuoi = popDouble(stack);
+    return ketQuaCuoi;
+}
+
+int main() {
+    string infix;
+    cout << "=== MAY TINH BIEU THUC ===\n";
+    cout << "Nhap bieu thuc: ";
+    getline(cin, infix);
+
+    string postfix = bieuThucToPostfix(infix);
+    cout << "\nBuoc 1 --- Chuyen sang Postfix: " << postfix << endl;
+
+    double kq = tinhToanPostfix(postfix);
+    cout << "\n=> Ket qua: " << infix << " = " << kq << endl;
+
+    return 0;
+}
