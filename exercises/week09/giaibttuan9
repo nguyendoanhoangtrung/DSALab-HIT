@@ -1,0 +1,440 @@
+Bài 1: Cài đặt Stack ⭐⭐
+Cài đặt Stack bằng mảng (array-based) và bằng Linked List. So sánh ưu nhược điểm.
+#include <iostream>
+
+using namespace std;
+
+struct CircularArrayQueue {
+    int* data;
+    int front;
+    int rear;
+    int capacity;
+    int size;
+};
+
+void initArray(CircularArrayQueue &q, int cap) {
+    q.capacity = cap;
+    q.front = 0;
+    q.rear = -1;
+    q.size = 0;
+    q.data = new int[cap];
+}
+
+bool isEmptyArray(CircularArrayQueue q) {
+    return q.size == 0;
+}
+
+bool isFullArray(CircularArrayQueue q) {
+    return q.size == q.capacity;
+}
+
+void enqueueArray(CircularArrayQueue &q, int val) {
+    if (isFullArray(q)) return;
+    q.rear = (q.rear + 1) % q.capacity;
+    q.data[q.rear] = val;
+    q.size++;
+}
+
+void dequeueArray(CircularArrayQueue &q) {
+    if (isEmptyArray(q)) return;
+    q.front = (q.front + 1) % q.capacity;
+    q.size--;
+}
+
+int peekArray(CircularArrayQueue q) {
+    if (isEmptyArray(q)) return -1;
+    return q.data[q.front];
+}
+
+void freeArray(CircularArrayQueue &q) {
+    delete[] q.data;
+}
+
+struct Node {
+    int data;
+    Node* next;
+};
+
+struct ListQueue {
+    Node* front;
+    Node* rear;
+};
+
+void initList(ListQueue &q) {
+    q.front = nullptr;
+    q.rear = nullptr;
+}
+
+bool isEmptyList(ListQueue q) {
+    return q.front == nullptr;
+}
+
+void enqueueList(ListQueue &q, int val) {
+    Node* newNode = new Node{val, nullptr};
+    if (isEmptyList(q)) {
+        q.front = newNode;
+        q.rear = newNode;
+        return;
+    }
+    q.rear->next = newNode;
+    q.rear = newNode;
+}
+
+void dequeueList(ListQueue &q) {
+    if (isEmptyList(q)) return;
+    Node* temp = q.front;
+    q.front = q.front->next;
+    if (q.front == nullptr) {
+        q.rear = nullptr;
+    }
+    delete temp;
+}
+
+int peekList(ListQueue q) {
+    if (isEmptyList(q)) return -1;
+    return q.front->data;
+}
+
+void freeList(ListQueue &q) {
+    while (!isEmptyList(q)) {
+        dequeueList(q);
+    }
+}
+
+int main() {
+    CircularArrayQueue q1;
+    initArray(q1, 3);
+    enqueueArray(q1, 10);
+    enqueueArray(q1, 20);
+    enqueueArray(q1, 30);
+    cout << "CircularArrayQueue Full: " << (isFullArray(q1) ? "Yes" : "No") << endl;
+    cout << "Front: " << peekArray(q1) << endl;
+    dequeueArray(q1);
+    cout << "Front sau dequeue: " << peekArray(q1) << endl;
+    freeArray(q1);
+
+    ListQueue q2;
+    initList(q2);
+    enqueueList(q2, 100);
+    enqueueList(q2, 200);
+    cout << "ListQueue Front: " << peekList(q2) << endl;
+    dequeueList(q2);
+    cout << "ListQueue Front sau dequeue: " << peekList(q2) << endl;
+    freeList(q2);
+
+    return 0;
+}
+Bài 2: Kiểm tra ngoặc hợp lệ ⭐⭐
+Kiểm tra chuỗi có đóng mở ngoặc (), [], {} hợp lệ không. Xử lý cả chuỗi code thực tế.
+#include <iostream>
+#include <string>
+
+using namespace std;
+
+struct Node {
+    char data;
+    Node* next;
+    Node* prev;
+};
+
+struct Deque {
+    Node* front;
+    Node* rear;
+};
+
+void initDeque(Deque &dq) {
+    dq.front = nullptr;
+    dq.rear = nullptr;
+}
+
+bool isEmpty(Deque dq) {
+    return dq.front == nullptr;
+}
+
+void pushFront(Deque &dq, char val) {
+    Node* newNode = new Node{val, dq.front, nullptr};
+    if (isEmpty(dq)) {
+        dq.front = newNode;
+        dq.rear = newNode;
+        return;
+    }
+    dq.front->prev = newNode;
+    dq.front = newNode;
+}
+
+void pushRear(Deque &dq, char val) {
+    Node* newNode = new Node{val, nullptr, dq.rear};
+    if (isEmpty(dq)) {
+        dq.front = newNode;
+        dq.rear = newNode;
+        return;
+    }
+    dq.rear->next = newNode;
+    dq.rear = newNode;
+}
+
+char popFront(Deque &dq) {
+    if (isEmpty(dq)) return '\0';
+    Node* temp = dq.front;
+    char res = temp->data;
+    dq.front = dq.front->next;
+    if (dq.front == nullptr) {
+        dq.rear = nullptr;
+    } else {
+        dq.front->prev = nullptr;
+    }
+    delete temp;
+    return res;
+}
+
+char popRear(Deque &dq) {
+    if (isEmpty(dq)) return '\0';
+    Node* temp = dq.rear;
+    char res = temp->data;
+    dq.rear = dq.rear->prev;
+    if (dq.rear == nullptr) {
+        dq.front = nullptr;
+    } else {
+        dq.rear->next = nullptr;
+    }
+    delete temp;
+    return res;
+}
+
+bool kiemTraPalindrome(string s) {
+    Deque dq;
+    initDeque(dq);
+    for (int i = 0; i < s.length(); i++) {
+        if (s[i] != ' ') {
+            pushRear(dq, tolower(s[i]));
+        }
+    }
+    while (dq.front != nullptr && dq.front != dq.rear) {
+        char dau = popFront(dq);
+        char cuoi = popRear(dq);
+        if (dau != cuoi) {
+            while (!isEmpty(dq)) popFront(dq);
+            return false;
+        }
+    }
+    while (!isEmpty(dq)) popFront(dq);
+    return true;
+}
+
+int main() {
+    string s1 = "radar";
+    string s2 = "hello";
+
+    cout << "Chuoi \"" << s1 << "\" la Palindrome: " << (kiemTraPalindrome(s1) ? "DUNG" : "SAI") << endl;
+    cout << "Chuoi \"" << s2 << "\" la Palindrome: " << (kiemTraPalindrome(s2) ? "DUNG" : "SAI") << endl;
+
+    return 0;
+}
+Bài 3: Chuyển đổi biểu thức ⭐⭐⭐
+Chuyển biểu thức Infix → Postfix → Prefix. In từng bước.
+#include <iostream>
+#include <string>
+
+using namespace std;
+
+struct BenhNhan {
+    string ten;
+    int uuTien; 
+};
+
+struct PriorityQueue {
+    BenhNhan* data;
+    int size;
+    int capacity;
+};
+
+void initPQ(PriorityQueue &pq, int cap) {
+    pq.capacity = cap;
+    pq.size = 0;
+    pq.data = new BenhNhan[cap];
+}
+
+bool isEmpty(PriorityQueue pq) {
+    return pq.size == 0;
+}
+
+void enqueue(PriorityQueue &pq, string ten, int uuTien) {
+    if (pq.size >= pq.capacity) return;
+    pq.data[pq.size] = {ten, uuTien};
+    pq.size++;
+}
+
+BenhNhan dequeue(PriorityQueue &pq) {
+    if (isEmpty(pq)) return {"", -1};
+    
+    int maxIdx = 0;
+    for (int i = 1; i < pq.size; i++) {
+        if (pq.data[i].uuTien > pq.data[maxIdx].uuTien) {
+            maxIdx = i;
+        }
+    }
+    
+    BenhNhan res = pq.data[maxIdx];
+    for (int i = maxIdx; i < pq.size - 1; i++) {
+        pq.data[i] = pq.data[i + 1];
+    }
+    pq.size--;
+    return res;
+}
+
+void freePQ(PriorityQueue &pq) {
+    delete[] pq.data;
+}
+
+int main() {
+    PriorityQueue pq;
+    initPQ(pq, 10);
+
+    enqueue(pq, "Nguyen Van C (Thuong)", 1);
+    enqueue(pq, "Nguyen Van A (Cap cuu)", 3);
+    enqueue(pq, "Tran Thi B (Khan)", 2);
+
+    cout << "--- THU TU GOI BENH NHAN ---\n";
+    while (!isEmpty(pq)) {
+        BenhNhan bn = dequeue(pq);
+        cout << "Moi benh nhan: " << bn.ten << " (Muc do: " << bn.uuTien << ") vao phong kham.\n";
+    }
+
+    freePQ(pq);
+    return 0;
+}
+Bài 4: 🔥 Dự Án Mini — Máy Tính Biểu Thức ⭐⭐⭐
+#include <iostream>
+#include <string>
+#include <iomanip>
+
+using namespace std;
+
+struct Patient {
+    string ten;
+    int mucUuTien; 
+    int thoiGianCho;
+};
+
+struct HospitalQueue {
+    Patient* data;
+    int size;
+    int capacity;
+};
+
+void initQueue(HospitalQueue &hq, int cap) {
+    hq.capacity = cap;
+    hq.size = 0;
+    hq.data = new Patient[cap];
+}
+
+void enqueuePatient(HospitalQueue &hq, string ten, int uuTien, int tgCho) {
+    if (hq.size >= hq.capacity) {
+        cout << "Hang cho da day!\n";
+        return;
+    }
+    hq.data[hq.size] = {ten, uuTien, tgCho};
+    hq.size++;
+    cout << "-> Da xep benh nhan [" << ten << "] vao hang cho.\n";
+}
+
+int timViTriUuTienNhat(HospitalQueue hq) {
+    int idx = 0;
+    for (int i = 1; i < hq.size; i++) {
+        if (hq.data[i].mucUuTien > hq.data[idx].mucUuTien) {
+            idx = i;
+        } else if (hq.data[i].mucUuTien == hq.data[idx].mucUuTien) {
+            if (hq.data[i].thoiGianCho > hq.data[idx].thoiGianCho) {
+                idx = i;
+            }
+        }
+    }
+    return idx;
+}
+
+void callNextPatient(HospitalQueue &hq, int &tongBn, int &tongTgCho) {
+    if (hq.size == 0) {
+        cout << "\nKhong co benh nhan nao dang cho!\n";
+        return;
+    }
+    int idx = timViTriUuTienNhat(hq);
+    Patient bn = hq.data[idx];
+
+    for (int i = idx; i < hq.size - 1; i++) {
+        hq.data[i] = hq.data[i + 1];
+    }
+    hq.size--;
+
+    tongBn++;
+    tongTgCho += bn.thoiGianCho;
+
+    string sUuTien = (bn.mucUuTien == 3) ? "Cap cuu" : ((bn.mucUuTien == 2) ? "Khan" : "Thuong");
+    cout << "\n✅ MOI BENH NHAN: " << bn.ten << " (" << sUuTien << ") - Phong kham 3\n";
+}
+
+void displayQueue(HospitalQueue hq) {
+    cout << "\nHang cho hien tai (" << hq.size << " nguoi):\n";
+    if (hq.size == 0) {
+        cout << " Trong\n";
+        return;
+    }
+    for (int i = 0; i < hq.size; i++) {
+        string sUuTien = (hq.data[i].mucUuTien == 3) ? "Cap cuu" : ((hq.data[i].mucUuTien == 2) ? "Khan" : "Thuong");
+        cout << "  [" << i + 1 << "] " << setw(15) << left << hq.data[i].ten 
+             << " - " << setw(10) << left << sUuTien 
+             << " - Cho: " << hq.data[i].thoiGianCho << " phut\n";
+    }
+}
+
+void thongKeCuoiCa(int tongBn, int tongTgCho) {
+    cout << "\n=== THONG KE CUOI CA ===\n";
+    cout << "Tong so benh nhan da kham: " << tongBn << endl;
+    if (tongBn > 0) {
+        double tb = (double)tongTgCho / tongBn;
+        cout << "Thoi gian cho trung binh: " << fixed << setprecision(2) << tb << " phut\n";
+    } else {
+        cout << "Thoi gian cho trung binh: 0 phut\n";
+    }
+}
+
+int main() {
+    HospitalQueue hq;
+    initQueue(hq, 20);
+
+    int tongBenhNhan = 0;
+    int tongThoiGianCho = 0;
+
+    enqueuePatient(hq, "Le Van C", 2, 8);
+    enqueuePatient(hq, "Pham D", 2, 3);
+    enqueuePatient(hq, "Hoang E", 1, 15);
+
+    int luaChon;
+    do {
+        cout << "\n=== 🏥 HE THONG HANG CHO BENH VIEN ===\n";
+        cout << "1. Them benh nhan moi\n";
+        cout << "2. Goi benh nhan tiep theo\n";
+        cout << "3. Hien thi hang cho\n";
+        cout << "0. Ket thuc ca lam viec & Xem thong ke\n";
+        cout << "Nhap lua chon: ";
+        cin >> luaChon;
+        cin.ignore();
+
+        if (luaChon == 1) {
+            string ten;
+            int uuTien, tgCho;
+            cout << "Nhap ten benh nhan: "; getline(cin, ten);
+            cout << "Muc uu tien (3: Cap cuu, 2: Khan, 1: Thuong): "; cin >> uuTien;
+            cout << "Thoi gian da cho (phut): "; cin >> tgCho;
+            enqueuePatient(hq, ten, uuTien, tgCho);
+        } else if (luaChon == 2) {
+            callNextPatient(hq, tongBenhNhan, tongThoiGianCho);
+        } else if (luaChon == 3) {
+            displayQueue(hq);
+        }
+    } while (luaChon != 0);
+
+    thongKeCuoiCa(tongBenhNhan, tongThoiGianCho);
+
+    delete[] hq.data;
+    return 0;
+}
