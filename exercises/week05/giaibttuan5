@@ -1,0 +1,396 @@
+Bài 1: Merge Sort ⭐⭐
+#include <iostream>
+using namespace std;
+
+void merge(int arr[], int left, int mid, int right, long long &soSanh) {
+    int n1 = mid - left + 1;
+    int n2 = right - mid;
+
+    int* L = new int[n1];
+    int* R = new int[n2];
+
+    for (int i = 0; i < n1; i++) L[i] = arr[left + i];
+    for (int j = 0; j < n2; j++) R[j] = arr[mid + 1 + j];
+
+    int i = 0, j = 0, k = left;
+    while (i < n1 && j < n2) {
+        soSanh++;
+        if (L[i] <= R[j]) {
+            arr[k] = L[i];
+            i++;
+        } else {
+            arr[k] = R[j];
+            j++;
+        }
+        k++;
+    }
+
+    while (i < n1) {
+        arr[k] = L[i];
+        i++;
+        k++;
+    }
+
+    while (j < n2) {
+        arr[k] = R[j];
+        j++;
+        k++;
+    }
+
+    delete[] L;
+    delete[] R;
+}
+
+void mergeSort(int arr[], int left, int right, long long &soSanh) {
+    if (left < right) {
+        int mid = left + (right - left) / 2;
+        mergeSort(arr, left, mid, soSanh);
+        mergeSort(arr, mid + 1, right, soSanh);
+        merge(arr, left, mid, right, soSanh);
+    }
+}
+
+int main() {
+    int n;
+    cout << "Nhap so phan tu n: ";
+    cin >> n;
+    int* arr = new int[n];
+    for (int i = 0; i < n; i++) {
+        cout << "Nhap phan tu " << i << ": ";
+        cin >> arr[i];
+    }
+
+    long long soSanh = 0;
+    mergeSort(arr, 0, n - 1, soSanh);
+
+    cout << "\nMang sau khi sap xep: ";
+    for (int i = 0; i < n; i++) cout << arr[i] << " ";
+    cout << "\nTong so phep so sanh: " << soSanh << endl;
+
+    delete[] arr;
+    return 0;
+}
+Bài 2: Quick Sort ⭐⭐
+#include <iostream>
+#include <cstdlib>
+using namespace std;
+
+void saoChepMang(int nguon[], int dich[], int n) {
+    for (int i = 0; i < n; i++) dich[i] = nguon[i];
+}
+
+int partitionDau(int arr[], int low, int high, long long &soSanh) {
+    int pivot = arr[low];
+    int i = low + 1;
+    for (int j = low + 1; j <= high; j++) {
+        soSanh++;
+        if (arr[j] < pivot) {
+            swap(arr[i], arr[j]);
+            i++;
+        }
+    }
+    swap(arr[low], arr[i - 1]);
+    return i - 1;
+}
+
+void quickSortDau(int arr[], int low, int high, long long &soSanh) {
+    if (low < high) {
+        int pi = partitionDau(arr, low, high, soSanh);
+        quickSortDau(arr, low, pi - 1, soSanh);
+        quickSortDau(arr, pi + 1, high, soSanh);
+    }
+}
+
+int partitionCuoi(int arr[], int low, int high, long long &soSanh) {
+    int pivot = arr[high];
+    int i = low - 1;
+    for (int j = low; j < high; j++) {
+        soSanh++;
+        if (arr[j] < pivot) {
+            i++;
+            swap(arr[i], arr[j]);
+        }
+    }
+    swap(arr[i + 1], arr[high]);
+    return i + 1;
+}
+
+void quickSortCuoi(int arr[], int low, int high, long long &soSanh) {
+    if (low < high) {
+        int pi = partitionCuoi(arr, low, high, soSanh);
+        quickSortCuoi(arr, low, pi - 1, soSanh);
+        quickSortCuoi(arr, pi + 1, high, soSanh);
+    }
+}
+
+int partitionGiua(int arr[], int low, int high, long long &soSanh) {
+    int mid = low + (high - low) / 2;
+    swap(arr[mid], arr[high]);
+    return partitionCuoi(arr, low, high, soSanh);
+}
+
+void quickSortGiua(int arr[], int low, int high, long long &soSanh) {
+    if (low < high) {
+        int pi = partitionGiua(arr, low, high, soSanh);
+        quickSortGiua(arr, low, pi - 1, soSanh);
+        quickSortGiua(arr, pi + 1, high, soSanh);
+    }
+}
+
+int main() {
+    int n = 1000;
+    int* goc = new int[n];
+    int* phu = new int[n];
+
+    for (int i = 0; i < n; i++) goc[i] = n - i;
+
+    long long ssDau = 0, ssCuoi = 0, ssGiua = 0;
+
+    saoChepMang(goc, phu, n);
+    quickSortDau(phu, 0, n - 1, ssDau);
+
+    saoChepMang(goc, phu, n);
+    quickSortCuoi(phu, 0, n - 1, ssCuoi);
+
+    saoChepMang(goc, phu, n);
+    quickSortGiua(phu, 0, n - 1, ssGiua);
+
+    cout << "So sanh so phep so sanh tren mang giam dan (N = " << n << "):\n";
+    cout << "- Chon Pivot o DAU:  " << ssDau << " phep so sanh\n";
+    cout << "- Chon Pivot o CUOI: " << ssCuoi << " phep so sanh\n";
+    cout << "- Chon Pivot o GIUA: " << ssGiua << " phep so sanh\n";
+
+    delete[] goc;
+    delete[] phu;
+    return 0;
+}
+Bài 3: Heap Sort ⭐⭐⭐
+#include <iostream>
+using namespace std;
+
+void inMang(int arr[], int n) {
+    for (int i = 0; i < n; i++) cout << arr[i] << " ";
+    cout << endl;
+}
+
+void heapify(int arr[], int n, int i) {
+    int largest = i;
+    int left = 2 * i + 1;
+    int right = 2 * i + 2;
+
+    if (left < n && arr[left] > arr[largest]) largest = left;
+    if (right < n && arr[right] > arr[largest]) largest = right;
+
+    if (largest != i) {
+        swap(arr[i], arr[largest]);
+        heapify(arr, n, largest);
+    }
+}
+
+void heapSort(int arr[], int n) {
+    cout << "\n--- QUA TRINH XAY DUNG MAX HEAP BAN DAU ---\n";
+    for (int i = n / 2 - 1; i >= 0; i--) {
+        heapify(arr, n, i);
+        cout << "Heapify tai nut i = " << i << ": ";
+        inMang(arr, n);
+    }
+
+    cout << "\n--- QUA TRINH TRICH XUAT VA SAP XEP ---\n";
+    for (int i = n - 1; i > 0; i--) {
+        swap(arr[0], arr[i]);
+        heapify(arr, i, 0);
+        cout << "Giam kich thuoc heap con " << i << ": ";
+        inMang(arr, n);
+    }
+}
+
+int main() {
+    int n;
+    cout << "Nhap so phan tu n: ";
+    cin >> n;
+    int* arr = new int[n];
+    for (int i = 0; i < n; i++) {
+        cout << "Nhap phan tu " << i << ": ";
+        cin >> arr[i];
+    }
+
+    heapSort(arr, n);
+
+    cout << "\nMang cuoi cung sau khi sap xep: ";
+    inMang(arr, n);
+
+    delete[] arr;
+    return 0;
+}
+Bài 4: 🔥 Dự Án Mini — Sort Race ⭐⭐⭐
+#include <iostream>
+#include <chrono>
+#include <fstream>
+#include <cstdlib>
+
+using namespace std;
+using namespace std::chrono;
+
+void taoDuLieu(int arr[], int n, int loai) {
+    if (loai == 1) {
+        for (int i = 0; i < n; i++) arr[i] = rand() % 100000;
+    } else if (loai == 2) {
+        for (int i = 0; i < n; i++) arr[i] = i;
+    } else {
+        for (int i = 0; i < n; i++) arr[i] = n - i;
+    }
+}
+
+void saoChep(int nguon[], int dich[], int n) {
+    for (int i = 0; i < n; i++) dich[i] = nguon[i];
+}
+
+void bubbleSort(int arr[], int n) {
+    for (int i = 0; i < n - 1; i++) {
+        bool sw = false;
+        for (int j = 0; j < n - i - 1; j++) {
+            if (arr[j] > arr[j + 1]) {
+                swap(arr[j], arr[j + 1]);
+                sw = true;
+            }
+        }
+        if (!sw) break;
+    }
+}
+
+void selectionSort(int arr[], int n) {
+    for (int i = 0; i < n - 1; i++) {
+        int m = i;
+        for (int j = i + 1; j < n; j++) if (arr[j] < arr[m]) m = j;
+        swap(arr[i], arr[m]);
+    }
+}
+
+void insertionSort(int arr[], int n) {
+    for (int i = 1; i < n; i++) {
+        int k = arr[i], j = i - 1;
+        while (j >= 0 && arr[j] > k) {
+            arr[j + 1] = arr[j];
+            j--;
+        }
+        arr[j + 1] = k;
+    }
+}
+
+void merge(int arr[], int l, int m, int r) {
+    int n1 = m - l + 1, n2 = r - m;
+    int* L = new int[n1]; int* R = new int[n2];
+    for (int i = 0; i < n1; i++) L[i] = arr[l + i];
+    for (int j = 0; j < n2; j++) R[j] = arr[m + 1 + j];
+    int i = 0, j = 0, k = l;
+    while (i < n1 && j < n2) arr[k++] = (L[i] <= R[j]) ? L[i++] : R[j++];
+    while (i < n1) arr[k++] = L[i++];
+    while (j < n2) arr[k++] = R[j++];
+    delete[] L; delete[] R;
+}
+
+void mergeSort(int arr[], int l, int r) {
+    if (l < r) {
+        int m = l + (r - l) / 2;
+        mergeSort(arr, l, m); mergeSort(arr, m + 1, r); merge(arr, l, m, r);
+    }
+}
+
+void qSort(int arr[], int low, int high) {
+    if (low < high) {
+        int p = arr[low + (high - low) / 2];
+        int i = low, j = high;
+        while (i <= j) {
+            while (arr[i] < p) i++;
+            while (arr[j] > p) j--;
+            if (i <= j) swap(arr[i++], arr[j--]);
+        }
+        qSort(arr, low, j); qSort(arr, i, high);
+    }
+}
+
+void heapify(int arr[], int n, int i) {
+    int lg = i, l = 2 * i + 1, r = 2 * i + 2;
+    if (l < n && arr[l] > arr[lg]) lg = l;
+    if (r < n && arr[r] > arr[lg]) lg = r;
+    if (lg != i) { swap(arr[i], arr[lg]); heapify(arr, n, lg); }
+}
+
+void heapSort(int arr[], int n) {
+    for (int i = n / 2 - 1; i >= 0; i--) heapify(arr, n, i);
+    for (int i = n - 1; i > 0; i--) { swap(arr[0], arr[i]); heapify(arr, i, 0); }
+}
+
+double testSort(void (*sortFunc)(int[], int), int arr[], int n) {
+    if (n > 10000 && (sortFunc == bubbleSort || sortFunc == selectionSort)) return -1;
+    auto s = high_resolution_clock::now();
+    sortFunc(arr, n);
+    auto e = high_resolution_clock::now();
+    return duration<double, milli>(e - s).count();
+}
+
+double testMerge(int arr[], int n) {
+    auto s = high_resolution_clock::now();
+    mergeSort(arr, 0, n - 1);
+    auto e = high_resolution_clock::now();
+    return duration<double, milli>(e - s).count();
+}
+
+double testQuick(int arr[], int n) {
+    auto s = high_resolution_clock::now();
+    qSort(arr, 0, n - 1);
+    auto e = high_resolution_clock::now();
+    return duration<double, milli>(e - s).count();
+}
+
+void chayGhiFile(ofstream &f, int loai, string tenLoai) {
+    int m[3] = {1000, 10000, 100000};
+    double r[6][3];
+
+    for (int i = 0; i < 3; i++) {
+        int n = m[i];
+        int* g = new int[n]; int* p = new int[n];
+        taoDuLieu(g, n, loai);
+
+        saoChep(g, p, n); r[0][i] = testSort(bubbleSort, p, n);
+        saoChep(g, p, n); r[1][i] = testSort(selectionSort, p, n);
+        saoChep(g, p, n); r[2][i] = testSort(insertionSort, p, n);
+        saoChep(g, p, n); r[3][i] = testMerge(p, n);
+        saoChep(g, p, n); r[4][i] = testQuick(p, n);
+        saoChep(g, p, n); r[5][i] = testSort(heapSort, p, n);
+
+        delete[] g; delete[] p;
+    }
+
+    f << "Data Type: " << tenLoai << ",,\n";
+    f << "Algorithm,n=1000,n=10000,n=100000\n";
+    string names[6] = {"Bubble Sort", "Selection Sort", "Insertion Sort", "Merge Sort", "Quick Sort", "Heap Sort"};
+    for (int i = 0; i < 6; i++) {
+        f << names[i];
+        for (int j = 0; j < 3; j++) {
+            if (r[i][j] < 0) f << ",timeout";
+            else f << "," << r[i][j];
+        }
+        f << "\n";
+    }
+    f << ",,,\n";
+}
+
+int main() {
+    ofstream f("sort_race_results.csv");
+    if (!f) {
+        cout << "Loi tao file csv!\n";
+        return 1;
+    }
+
+    cout << "Dang chay cuoc dua sap xep tren mảng Ngau Nhien...\n";
+    chayGhiFile(f, 1, "Ngau Nhien");
+    cout << "Dang chay cuoc dua sap xep tren mảng Da Sap Xep...\n";
+    chayGhiFile(f, 2, "Da Sap Xep");
+    cout << "Dang chay cuoc dua sap xep tren mảng Nguoc Chieu...\n";
+    chayGhiFile(f, 3, "Nguoc Chieu");
+
+    f.close();
+    cout << "\n=> Da hoan thanh! Ket qua cuoc dua da duoc luu vao file 'sort_race_results.csv'\n";
+    return 0;
+}
