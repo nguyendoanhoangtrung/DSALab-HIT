@@ -1,0 +1,346 @@
+Bài 1: Xây dựng cây nhị phân ⭐⭐
+Xây dựng cây từ mảng (biểu diễn heap). Tính chiều cao, đếm nút lá, nút trong.
+#include <iostream>
+
+using namespace std;
+
+struct Node {
+    int data;
+    Node* left;
+    Node* right;
+};
+
+Node* taoNut(int val) {
+    return new Node{val, nullptr, nullptr};
+}
+
+Node* xayCayTuMang(int arr[], int n, int i) {
+    Node* root = nullptr;
+    if (i < n) {
+        root = taoNut(arr[i]);
+        root->left = xayCayTuMang(arr, n, 2 * i + 1);
+        root->right = xayCayTuMang(arr, n, 2 * i + 2);
+    }
+    return root;
+}
+
+int tinhChieuCao(Node* root) {
+    if (root == nullptr) return 0;
+    int lh = tinhChieuCao(root->left);
+    int rh = tinhChieuCao(root->right);
+    return 1 + (lh > rh ? lh : rh);
+}
+
+int demNutLa(Node* root) {
+    if (root == nullptr) return 0;
+    if (root->left == nullptr && root->right == nullptr) return 1;
+    return demNutLa(root->left) + demNutLa(root->right);
+}
+
+int demNutTrong(Node* root) {
+    if (root == nullptr) return 0;
+    if (root->left == nullptr && root->right == nullptr) return 0;
+    return 1 + demNutTrong(root->left) + demNutTrong(root->right);
+}
+
+void giaiPhongCay(Node* root) {
+    if (root == nullptr) return;
+    giaiPhongCay(root->left);
+    giaiPhongCay(root->right);
+    delete root;
+}
+
+int main() {
+    int arr[] = {10, 20, 30, 40, 50, 60};
+    int n = sizeof(arr) / sizeof(arr[0]);
+
+    Node* root = xayCayTuMang(arr, n, 0);
+
+    cout << "Chieu cao cua cay: " << tinhChieuCao(root) << endl;
+    cout << "So nut la: " << demNutLa(root) << endl;
+    cout << "So nut trong: " << demNutTrong(root) << endl;
+
+    giaiPhongCay(root);
+    return 0;
+}
+Bài 2: Duyệt cây đủ 4 cách ⭐⭐
+Cài đặt Pre-order, In-order, Post-order (đệ quy + iterative), Level-order (BFS bằng Queue).
+#include <iostream>
+
+using namespace std;
+
+struct Node {
+    int data;
+    Node* left;
+    Node* right;
+};
+
+struct QueueNode {
+    Node* treeNode;
+    QueueNode* next;
+};
+
+struct Queue {
+    QueueNode* front;
+    QueueNode* rear;
+};
+
+void enqueue(Queue &q, Node* tNode) {
+    if (tNode == nullptr) return;
+    QueueNode* newNode = new QueueNode{tNode, nullptr};
+    if (q.rear == nullptr) {
+        q.front = q.rear = newNode;
+        return;
+    }
+    q.rear->next = newNode;
+    q.rear = newNode;
+}
+
+Node* dequeue(Queue &q) {
+    if (q.front == nullptr) return nullptr;
+    QueueNode* temp = q.front;
+    Node* res = temp->treeNode;
+    q.front = q.front->next;
+    if (q.front == nullptr) q.rear = nullptr;
+    delete temp;
+    return res;
+}
+
+bool isQueueEmpty(Queue q) {
+    return q.front == nullptr;
+}
+
+struct StackNode {
+    Node* treeNode;
+    StackNode* next;
+};
+
+void push(StackNode* &top, Node* tNode) {
+    if (tNode == nullptr) return;
+    top = new StackNode{tNode, top};
+}
+
+Node* pop(StackNode* &top) {
+    if (top == nullptr) return nullptr;
+    StackNode* temp = top;
+    Node* res = temp->treeNode;
+    top = top->next;
+    delete temp;
+    return res;
+}
+
+bool isStackEmpty(StackNode* top) {
+    return top == nullptr;
+}
+
+void preOrder(Node* root) {
+    if (root == nullptr) return;
+    cout << root->data << " ";
+    preOrder(root->left);
+    preOrder(root->right);
+}
+
+void inOrder(Node* root) {
+    if (root == nullptr) return;
+    inOrder(root->left);
+    cout << root->data << " ";
+    inOrder(root->right);
+}
+
+void postOrder(Node* root) {
+    if (root == nullptr) return;
+    postOrder(root->left);
+    postOrder(root->right);
+    cout << root->data << " ";
+}
+
+void inOrderIterative(Node* root) {
+    StackNode* stack = nullptr;
+    Node* curr = root;
+    while (curr != nullptr || !isStackEmpty(stack)) {
+        while (curr != nullptr) {
+            push(stack, curr);
+            curr = curr->left;
+        }
+        curr = pop(stack);
+        cout << curr->data << " ";
+        curr = curr->right;
+    }
+}
+
+void levelOrder(Node* root) {
+    if (root == nullptr) return;
+    Queue q = {nullptr, nullptr};
+    enqueue(q, root);
+    while (!isQueueEmpty(q)) {
+        Node* curr = dequeue(q);
+        cout << curr->data << " ";
+        enqueue(q, curr->left);
+        enqueue(q, curr->right);
+    }
+}
+
+int main() {
+    Node* root = new Node{1, new Node{2, new Node{4}, new Node{5}}, new Node{3}};
+
+    cout << "Pre-order: "; preOrder(root); cout << endl;
+    cout << "In-order: "; inOrder(root); cout << endl;
+    cout << "Post-order: "; postOrder(root); cout << endl;
+    cout << "In-order (Iterative): "; inOrderIterative(root); cout << endl;
+    cout << "Level-order (BFS): "; levelOrder(root); cout << endl;
+
+    return 0;
+}
+Bài 3: Tính chất cây ⭐⭐⭐
+Kiểm tra cây cân bằng (Balanced), cây đối xứng (Symmetric), tìm Lowest Common Ancestor.
+#include <iostream>
+#include <cmath>
+
+using namespace std;
+
+struct Node {
+    int data;
+    Node* left;
+    Node* right;
+};
+
+int layChieuCao(Node* root) {
+    if (root == nullptr) return 0;
+    int lh = layChieuCao(root->left);
+    int rh = layChieuCao(root->right);
+    return 1 + (lh > rh ? lh : rh);
+}
+
+bool kiemTraCanBang(Node* root) {
+    if (root == nullptr) return true;
+    int lh = layChieuCao(root->left);
+    int rh = layChieuCao(root->right);
+    if (abs(lh - rh) <= 1 && kiemTraCanBang(root->left) && kiemTraCanBang(root->right)) {
+        return true;
+    }
+    return false;
+}
+
+bool troGiupDoiXung(Node* r1, Node* r2) {
+    if (r1 == nullptr && r2 == nullptr) return true;
+    if (r1 == nullptr || r2 == nullptr) return false;
+    return (r1->data == r2->data) && troGiupDoiXung(r1->left, r2->right) && troGiupDoiXung(r1->right, r2->left);
+}
+
+bool kiemTraDoiXung(Node* root) {
+    if (root == nullptr) return true;
+    return troGiupDoiXung(root->left, root->right);
+}
+
+Node* timLCA(Node* root, int n1, int n2) {
+    if (root == nullptr) return nullptr;
+    if (root->data == n1 || root->data == n2) return root;
+
+    Node* leftLCA = timLCA(root->left, n1, n2);
+    Node* rightLCA = timLCA(root->right, n1, n2);
+
+    if (leftLCA != nullptr && rightLCA != nullptr) return root;
+    return (leftLCA != nullptr) ? leftLCA : rightLCA;
+}
+
+int main() {
+    Node* root = new Node{1, new Node{2, new Node{4}, new Node{5}}, new Node{2, new Node{5}, new Node{4}}};
+
+    cout << "Cay doi xung: " << (kiemTraDoiXung(root) ? "DUNG" : "SAI") << endl;
+    cout << "Cay can bang: " << (kiemTraCanBang(root) ? "DUNG" : "SAI") << endl;
+
+    Node* lca = timLCA(root, 4, 5);
+    if (lca != nullptr) {
+        cout << "LCA cua 4 va 5 la: " << lca->data << endl;
+    }
+
+    return 0;
+}
+Bài 4: 🔥 Dự Án Mini — BST Visualizer (Console) ⭐⭐⭐
+#include <iostream>
+#include <string>
+
+using namespace std;
+
+struct Node {
+    int data;
+    Node* left;
+    Node* right;
+};
+
+Node* chenBST(Node* root, int val) {
+    if (root == nullptr) return new Node{val, nullptr, nullptr};
+    if (val < root->data) root->left = chenBST(root->left, val);
+    else if (val > root->data) root->right = chenBST(root->right, val);
+    return root;
+}
+
+int tinhChieuCao(Node* root) {
+    if (root == nullptr) return 0;
+    int lh = tinhChieuCao(root->left);
+    int rh = tinhChieuCao(root->right);
+    return 1 + (lh > rh ? lh : rh);
+}
+
+int demNut(Node* root) {
+    if (root == nullptr) return 0;
+    return 1 + demNut(root->left) + demNut(root->right);
+}
+
+bool kiemTraCanBang(Node* root) {
+    if (root == nullptr) return true;
+    int lh = tinhChieuCao(root->left);
+    int rh = tinhChieuCao(root->right);
+    return abs(lh - rh) <= 1 && kiemTraCanBang(root->left) && kiemTraCanBang(root->right);
+}
+
+void inOrder(Node* root) {
+    if (root == nullptr) return;
+    inOrder(root->left);
+    cout << root->data << " -> ";
+}
+
+void preOrder(Node* root) {
+    if (root == nullptr) return;
+    cout << root->data << " -> ";
+    preOrder(root->left);
+    preOrder(root->right);
+}
+
+void inKhongGian(int n) {
+    for (int i = 0; i < n; i++) cout << " ";
+}
+
+void inCay2D(Node* root, int khoangCach) {
+    if (root == nullptr) return;
+    khoangCach += 6;
+    inCay2D(root->right, khoangCach);
+    cout << endl;
+    inKhongGian(khoangCach - 6);
+    cout << root->data << endl;
+    inCay2D(root->left, khoangCach);
+}
+
+int main() {
+    Node* root = nullptr;
+    int values[] = {50, 30, 70, 20, 40, 60, 80};
+    int n = sizeof(values) / sizeof(values[0]);
+
+    for (int i = 0; i < n; i++) {
+        root = chenBST(root, values[i]);
+    }
+
+    cout << "=== 🌳 BINARY TREE VISUALIZER ===\n";
+    cout << "Mo hinh cay xoay ngang (Phai qua Trai):\n";
+    inCay2D(root, 0);
+    cout << "-------------------------------------------\n";
+
+    cout << "\nDuyet In-order:  "; inOrder(root); cout << "END\n";
+    cout << "Duyet Pre-order: "; preOrder(root); cout << "END\n";
+    
+    cout << "\nChieu cao: " << tinhChieuCao(root);
+    cout << " | So nut: " << demNut(root);
+    cout << " | Can bang: " << (kiemTraCanBang(root) ? "✅" : "❌") << endl;
+
+    return 0;
+}
