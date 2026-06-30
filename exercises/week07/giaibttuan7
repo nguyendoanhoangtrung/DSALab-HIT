@@ -1,0 +1,353 @@
+Bài 1: Doubly Linked List ⭐⭐
+Cài đặt đầy đủ với con trỏ prev và next. Duyệt xuôi và ngược. So sánh với Singly.
+#include <iostream>
+
+using namespace std;
+
+struct Node {
+    int data;
+    Node* next;
+    Node* prev;
+};
+
+void themCuoi(Node* &head, int val) {
+    Node* newNode = new Node{val, nullptr, nullptr};
+    if (head == nullptr) {
+        head = newNode;
+        return;
+    }
+    Node* temp = head;
+    while (temp->next != nullptr) {
+        temp = temp->next;
+    }
+    temp->next = newNode;
+    newNode->prev = temp;
+}
+
+void xoaTheoGiaTri(Node* &head, int val) {
+    if (head == nullptr) return;
+    Node* temp = head;
+    while (temp != nullptr && temp->data != val) {
+        temp = temp->next;
+    }
+    if (temp == nullptr) return;
+    if (temp == head) {
+        head = head->next;
+        if (head != nullptr) head->prev = nullptr;
+    } else {
+        if (temp->next != nullptr) temp->next->prev = temp->prev;
+        if (temp->prev != nullptr) temp->prev->next = temp->next;
+    }
+    delete temp;
+}
+
+void duyetXuoi(Node* head) {
+    cout << "Duyet xuoi: ";
+    Node* temp = head;
+    while (temp != nullptr) {
+        cout << temp->data << " <-> ";
+        temp = temp->next;
+    }
+    cout << "NULL\n";
+}
+
+void duyetNguoc(Node* head) {
+    cout << "Duyet nguoc: ";
+    if (head == nullptr) {
+        cout << "NULL\n";
+        return;
+    }
+    Node* temp = head;
+    while (temp->next != nullptr) {
+        temp = temp->next;
+    }
+    while (temp != nullptr) {
+        cout << temp->data << " <-> ";
+        temp = temp->prev;
+    }
+    cout << "NULL\n";
+}
+
+void giaiPhong(Node* &head) {
+    while (head != nullptr) {
+        Node* temp = head;
+        head = head->next;
+        delete temp;
+    }
+}
+
+int main() {
+    Node* head = nullptr;
+    themCuoi(head, 10);
+    themCuoi(head, 20);
+    themCuoi(head, 30);
+    themCuoi(head, 40);
+
+    duyetXuoi(head);
+    duyetNguoc(head);
+
+    cout << "\nSau khi xoa phan tu 20:\n";
+    xoaTheoGiaTri(head, 20);
+    duyetXuoi(head);
+    duyetNguoc(head);
+
+    giaiPhong(head);
+    return 0;
+}
+Bài 2: Circular Linked List ⭐⭐
+Cài đặt danh sách liên kết vòng. Duyệt đúng K vòng rồi dừng.
+#include <iostream>
+
+using namespace std;
+
+struct Node {
+    int data;
+    Node* next;
+};
+
+void themCuoi(Node* &head, int val) {
+    Node* newNode = new Node{val, nullptr};
+    if (head == nullptr) {
+        head = newNode;
+        newNode->next = head;
+        return;
+    }
+    Node* temp = head;
+    while (temp->next != head) {
+        temp = temp->next;
+    }
+    temp->next = newNode;
+    newNode->next = head;
+}
+
+void duyetKVong(Node* head, int k) {
+    if (head == nullptr || k <= 0) return;
+    Node* temp = head;
+    int vongHienTai = 0;
+    cout << "Bat dau duyet " << k << " vong danh sach lien ket vong:\n";
+    while (vongHienTai < k) {
+        cout << temp->data << " -> ";
+        temp = temp->next;
+        if (temp == head) {
+            vongHienTai++;
+            cout << "[Het vong " << vongHienTai << "]\n";
+        }
+    }
+}
+
+void giaiPhongVong(Node* &head) {
+    if (head == nullptr) return;
+    Node* curr = head;
+    Node* tiep = nullptr;
+    while (curr->next != head) {
+        tiep = curr->next;
+        curr->next = tiep->next;
+        delete tiep;
+    }
+    delete head;
+    head = nullptr;
+}
+
+int main() {
+    Node* head = nullptr;
+    themCuoi(head, 1);
+    themCuoi(head, 2);
+    themCuoi(head, 3);
+
+    duyetKVong(head, 3);
+    giaiPhongVong(head);
+    return 0;
+}
+Bài 3: Bài toán Josephus ⭐⭐⭐
+Dùng Circular Linked List giải bài toán Josephus: n người đứng thành vòng, đếm đến k thì loại. Ai là người cuối?
+#include <iostream>
+
+using namespace std;
+
+struct Node {
+    int id;
+    Node* next;
+};
+
+void giaiJosephus(int n, int k) {
+    if (n <= 0 || k <= 0) return;
+    Node* head = new Node{1, nullptr};
+    head->next = head;
+    Node* tail = head;
+
+    for (int i = 2; i <= n; i++) {
+        Node* newNode = new Node{i, head};
+        tail->next = newNode;
+        tail = newNode;
+    }
+
+    Node* curr = head;
+    Node* prev = tail;
+
+    cout << "Thu tu nhung nguoi bi loai: ";
+    while (curr->next != curr) {
+        for (int count = 1; count < k; count++) {
+            prev = curr;
+            curr = curr->next;
+        }
+        cout << curr->id << " ";
+        prev->next = curr->next;
+        delete curr;
+        curr = prev->next;
+    }
+    cout << "\nNguoi cuoi cung con song sot la: " << curr->id << endl;
+    delete curr;
+}
+
+int main() {
+    int n, k;
+    cout << "Nhap so luong nguoi n: ";
+    cin >> n;
+    cout << "Nhap buoc nhay k: ";
+    cin >> k;
+
+    giaiJosephus(n, k);
+    return 0;
+}
+Bài 4: 🔥 Dự Án Mini — Music Playlist Player ⭐⭐⭐
+#include <iostream>
+#include <string>
+#include <cstdlib>
+
+using namespace std;
+
+struct Song {
+    string tenBaiHat;
+    string caSi;
+    string thoiGian;
+    Song* next;
+    Song* prev;
+};
+
+void themBaiHat(Song* &head, string ten, string caSi, string t) {
+    Song* newSong = new Song{ten, caSi, t, nullptr, nullptr};
+    if (head == nullptr) {
+        head = newSong;
+        head->next = head;
+        head->prev = head;
+        return;
+    }
+    Song* tail = head->prev;
+    tail->next = newSong;
+    newSong->prev = tail;
+    newSong->next = head;
+    head->prev = newSong;
+}
+
+void xoaBaiHatHienTai(Song* &head, Song* &current) {
+    if (head == nullptr || current == nullptr) return;
+    if (head->next == head) {
+        delete head;
+        head = nullptr;
+        current = nullptr;
+        return;
+    }
+    Song* pPrev = current->prev;
+    Song* pNext = current->next;
+    pPrev->next = pNext;
+    pNext->prev = pPrev;
+    if (current == head) {
+        head = pNext;
+    }
+    Song* temp = current;
+    current = pNext;
+    delete temp;
+}
+
+void hienThiTrinhPhat(Song* head, Song* current, bool isPlaying, int totalSongs) {
+    if (head == nullptr || current == nullptr) {
+        cout << "\nPlaylist trong! Vui long them bai hat.\n";
+        return;
+    }
+
+    int currentIdx = 1;
+    Song* temp = head;
+    while (temp != current) {
+        currentIdx++;
+        temp = temp->next;
+    }
+
+    cout << "\n=== 🎵 MUSIC PLAYER ===\n";
+    if (isPlaying) {
+        cout << "▶ Dang phat: [" << currentIdx << "/" << totalSongs << "] " << current->tenBaiHat << " - " << current->caSi << " (" << current->thoiGian << ")\n";
+    } else {
+        cout << "⏸ Dang dung: [" << currentIdx << "/" << totalSongs << "] " << current->tenBaiHat << " - " << current->caSi << " (" << current->thoiGian << ")\n";
+    }
+    cout << "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1:23 / " << current->thoiGian << "\n\n";
+
+    cout << "Playlist:\n";
+    int idx = 1;
+    temp = head;
+    do {
+        if (temp == current) {
+            cout << "► " << idx << ". " << temp->tenBaiHat << "   <- dang phat\n";
+        } else {
+            cout << "  " << idx << ". " << temp->tenBaiHat << "\n";
+        }
+        idx++;
+        temp = temp->next;
+    } while (temp != head);
+    cout << "\n[P] Phat/Dung  [N] Tiep  [B] Truoc  [S] Shuffle  [A] Them  [D] Xoa  [0] Thoat\n";
+}
+
+int main() {
+    Song* head = nullptr;
+    Song* current = nullptr;
+    int totalSongs = 0;
+    bool isPlaying = true;
+
+    themBaiHat(head, "Blinding Lights", "The Weeknd", "3:20"); totalSongs++;
+    themBaiHat(head, "Stay", "The Kid LAROI & Justin Bieber", "2:21"); totalSongs++;
+    themBaiHat(head, "Shape of You", "Ed Sheeran", "3:54"); totalSongs++;
+    themBaiHat(head, "Levitating", "Dua Lipa", "3:23"); totalSongs++;
+    themBaiHat(head, "Montero", "Lil Nas X", "2:18"); totalSongs++;
+    current = head;
+
+    char luachon;
+    do {
+        hienThiTrinhPhat(head, current, isPlaying, totalSongs);
+        cout << "Nhap lenh cua ban: ";
+        cin >> luachon;
+        luachon = toupper(luachon);
+
+        if (luachon == 'P') {
+            if (current != nullptr) isPlaying = !isPlaying;
+        } else if (luachon == 'N') {
+            if (current != nullptr) current = current->next;
+        } else if (luachon == 'B') {
+            if (current != nullptr) current = current->prev;
+        } else if (luachon == 'S') {
+            if (totalSongs > 1) {
+                int buocNhay = rand() % totalSongs + 1;
+                for (int i = 0; i < buocNhay; i++) {
+                    current = current->next;
+                }
+            }
+        } else if (luachon == 'A') {
+            string ten, caSi, t;
+            cin.ignore();
+            cout << "Nhap ten bai hat: "; getline(cin, ten);
+            cout << "Nhap ten ca si: "; getline(cin, caSi);
+            cout << "Nhap thoi luong (mm:ss): "; cin >> t;
+            themBaiHat(head, ten, caSi, t);
+            totalSongs++;
+            if (current == nullptr) current = head;
+        } else if (luachon == 'D') {
+            if (current != nullptr) {
+                xoaBaiHatHienTai(head, current);
+                totalSongs--;
+            }
+        }
+    } while (luachon != '0');
+
+    while (head != nullptr && totalSongs > 0) {
+        xoaBaiHatHienTai(head, head);
+        totalSongs--;
+    }
+    return 0;
+}
